@@ -1,0 +1,29 @@
+### Recuperar todos los usuarios
+GET http://localhost:3000/api/v1/example
+
+### Recuperar un usuario por id (path to regex)
+GET http://localhost:3000/api/v1/example/efa72fe9-4baa-494b-b24f-d792d442e0d7
+
+### Crear un usuario
+POST http://localhost:3000/api/v1/example
+Content-Type: application/json
+
+{
+  "fullName": "Hal Finney",
+  "jobArea": "Cypherpunk",
+  "email": "Hal-Finney@yahoo.com",
+  "isBlock": true
+}
+
+### Actualizar parcialmente a un usuario
+PATCH  http://localhost:3000/api/v1/example/efa72fe9-4baa-494b-b24f-d792d442e0d7
+Content-Type: application/json
+
+{
+  "fullName": "David Chaum",
+  "jobArea": "Cypherpunk's Father",
+  "email": "David-Chaum@yahoo.com"
+}
+
+### Eliminar un usuario por id
+DELETE  http://localhost:3000/api/v1/example/efa72fe9-4baa-494b-b24f-d792d442e0d7
