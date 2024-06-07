@@ -1,5 +1,5 @@
 import { describe, test, beforeAll, expect, afterAll } from 'vitest';
-import createApp from '../../src/app.js';
+import createApp from '../src/app.js';
 
 const request = require('supertest');
 

@@ -11,6 +11,7 @@ Este proyecto tiene por objeto servir como código base para proyectos Backend u
 
 ## Organización de directorios y reglas generales
 - docs: contendrá el contrato de los servicios web desarrollados, si se tienen diferentes versiones, se recomienda tener diferentes archivos (uno por versión). El formato deberá estar en *yaml* y por convención, ser nombrado como *openapi[_vn]*
+- e2e: carpeta para colocar las pruebas e2e del proyecto
 - src/common: recursos comunes de nuestro proyecto_
     - **config.js**: archivo de configuración del proyecto, encargado de leer las variables de entorno
     - **utils.js**: funciones compartidas en la aplicación
@@ -25,8 +26,8 @@ Este proyecto tiene por objeto servir como código base para proyectos Backend u
     - example.schema.js: cada recurso que manejemos deberá tener definidos sus esquemas.
 - src/services: contiene los servicios asociados a los recursos de nuestra aplicación:
     - example.service.js: se definen los servicios(métodos) que serán invocados por el router correspondiente. En este nivel, se hacen llamadas a la base de datos, servicios, entre otros.
-- app.js: archivo donde se encapsula la creación el servidor Express, aquí se proporciona el enlace con los *middlewares* y los *routes*
-- index.js: archivo donde se instancia *app* y se pone en escucha el servidor
+- src/app.js: archivo donde se encapsula la creación el servidor Express, aquí se proporciona el enlace con los *middlewares* y los *routes*
+- src/index.js: archivo donde se instancia *app* y se pone en escucha el servidor
 - .eslintrc.cjs: archivo de configuración de EsLint
 - vitest.config.js: archivo de configuración de vitest
 
