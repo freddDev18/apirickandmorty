@@ -31,6 +31,36 @@ Este proyecto tiene por objeto servir como código base para proyectos Backend u
 - .eslintrc.cjs: archivo de configuración de EsLint
 - vitest.config.js: archivo de configuración de vitest
 
+## Main-ORM
+Esta rama del proyecto contiene el código base y un ejemplo para la implementación del ORM Sequelize.
+
+Para la BD se utiliza MySQL corriendo en Docker, por lo que tendrás que tener instalado Docker en tu máquina.
+
+### Levantar BD en docker
+1. Situarse en la raiz del proyecto y ejecutar:
+
+`docker-compose up -d mysql`
+
+2. Corroborar que la BD esta arriba
+
+`docker-compose ps`
+
+3. Bajar la BD
+
+`docker-compose down`
+
+4. Conectarse a la terminal del contenedor
+`docker-compose exec mysql bash`
+
+5. Ejecutar mysql desde línea de comandos
+`mysql -utestuser -p`
+
+6. Salir del contenedor
+`exit`
+
+### Migraciones (no aplica si la BD ya existe)
+1. Ejecutar el siguiente comando para la creación de las tablas
+`npm run migrations:run`
 
 # Ejecución del proyecto en local
 El proyecto require un archivo de configuración de variables de ambiente, este deberá ser creado en la carpeta raíz del proyecto con el nombre **.env**, deberá contener las variables especificadas en el archivo **.env_example**.
