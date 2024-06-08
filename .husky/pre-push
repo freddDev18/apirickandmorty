@@ -1,1 +1,2 @@
+npm run db:setup
 npm run e2e

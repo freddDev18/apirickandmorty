@@ -12,14 +12,15 @@
     "prepare": "husky",
     "test": "vitest --exclude '**/*.e2e.js' --watch=false",
     "test:coverage": "vitest run --coverage --exclude '**/*.e2e.js' --watch=false",
-    "e2e": "npm run seeders:all && vitest --exclude '**/*.test.js' --watch=false",
-    "e2e:coverage": "npm run seeders:all && vitest run --coverage --exclude '**/*.test.js' --watch=false",
+    "e2e": "vitest --exclude '**/*.test.js' --watch=false",
+    "e2e:coverage": "npm run db:setup && vitest run --coverage --exclude '**/*.test.js' --watch=false",
     "migrations:generate": "sequelize-cli migration:generate --name",
     "migrations:run": "sequelize-cli db:migrate",
     "migrations:revert": "sequelize-cli db:migrate:undo",
     "migrations:delete": "sequelize-cli db:migrate:all",
     "seeders:all": "npx sequelize-cli db:seed:all",
-    "seeders:undo": "npx sequelize-cli db:seed:undo"
+    "seeders:undo": "npx sequelize-cli db:seed:undo",
+    "db:setup": "docker-compose up -d mysql && npm run migrations:run && npm run seeders:all"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
