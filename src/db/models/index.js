@@ -1,14 +1,9 @@
 /* eslint-disable import/no-dynamic-require */
 import { Sequelize } from 'sequelize';
-import config from '../../common/config.js';
 import { User } from './example.js';
+import sequelize from '../connections/sequelize.js';
 
 const db = {};
-
-const sequelize = new Sequelize(config.dbName, config.dbUser, config.dbPassword, {
-  host: config.dbHost,
-  dialect: 'mysql',
-});
 
 db.User = User;
 

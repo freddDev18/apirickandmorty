@@ -32,9 +32,23 @@ Este proyecto tiene por objeto servir como código base para proyectos Backend u
 - vitest.config.js: archivo de configuración de vitest
 
 ## Main-ORM
-Esta rama del proyecto contiene el código base y un ejemplo para la implementación del ORM Sequelize.
+Esta rama del proyecto contiene el código base y un ejemplo para la implementación del ORM [Sequelize](https://sequelize.org/).
 
-Para la BD se utiliza MySQL corriendo en Docker, por lo que tendrás que tener instalado Docker en tu máquina.
+Para la BD se utiliza MySQL corriendo en [Docker](https://www.docker.com/), por lo que tendrás que tener instalado Docker en tu máquina.
+
+### El directorio src/db
+Al utilizar una conexión a BD a través del ORM Sequelize, se adiciona el directorio *src/db*.
+- config/config.cjs: archivo de configuración para Sequelize-client que ayudará con las migraciones
+- connections: contiene el archivo con la conexión a la BD a través de Sequelize
+- migrations: puede contener múltiples archivos o uno solo, su objetivo es definir la creación de las tablas y estructura de la BD
+- models: contendrá los modelos que correspondan a cada tabla a utilizar (example.js) y el archivo index.js que se encargará de cargar los modelos para las migraciones
+- seeders: contendrá los archivos para la carga de datos iniciales de la BD (en este caso, datos de prueba). 
+
+### Setup de la BD
+De manera abreviada, puedes ejecutar el siguiente comando, para levantar el contenedor de la BD, ejecutar las migraciones y los seeders
+`npm run db:setup`
+
+En las siguientes secciones, se encuentran los pasos más a detalle para lograr el mismo resultado.
 
 ### Levantar BD en docker
 1. Situarse en la raiz del proyecto y ejecutar:
