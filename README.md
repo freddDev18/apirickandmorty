@@ -62,6 +62,13 @@ Para la BD se utiliza MySQL corriendo en Docker, por lo que tendrás que tener i
 1. Ejecutar el siguiente comando para la creación de las tablas
 `npm run migrations:run`
 
+### Seeders (no aplica si la BD ya existe)
+1. Para cargar los datos de prueba ejecutar:
+`npx sequelize-cli db:seed:all`
+
+2. Para revertir la carga de datos de prueba ejecutar:
+`npx sequelize-cli db:seed:undo`
+
 # Ejecución del proyecto en local
 El proyecto require un archivo de configuración de variables de ambiente, este deberá ser creado en la carpeta raíz del proyecto con el nombre **.env**, deberá contener las variables especificadas en el archivo **.env_example**.
 
