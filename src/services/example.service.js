@@ -21,7 +21,11 @@ class UsersService {
   }
 
   async findOne(id) {
-    const user = this.users.find(item => item.id === id);
+    const user = await User.findOne({
+      where: {
+        id
+      }
+    })
     if (!user) {
       throw boom.notFound('User not found');
     }
@@ -32,24 +36,20 @@ class UsersService {
   }
 
   async update(id, changes) {
-    const index = this.users.findIndex(item => item.id === id);
-    if (index === -1) {
+    const user = await this.findOne(id);
+    if (!user) {
       throw boom.notFound('User not found');
     }
-    const user = this.users[index];
-    this.users[index] = {
-      ...user,
-      ...changes
-    };
-    return this.users[index];
+    const rta = await user.update(changes);
+    return rta;
   }
 
   async delete(id) {
-    const index = this.users.findIndex(item => item.id === id);
-    if (index === -1) {
+    const user = await this.findOne(id);
+    if (!user) {
       throw boom.notFound('User not found');
     }
-    this.users.splice(index, 1);
+    await user.destroy();
     return { id }
   }
 }
