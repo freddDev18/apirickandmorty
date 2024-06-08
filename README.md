@@ -64,10 +64,10 @@ Para la BD se utiliza MySQL corriendo en Docker, por lo que tendrás que tener i
 
 ### Seeders (no aplica si la BD ya existe)
 1. Para cargar los datos de prueba ejecutar:
-`npx sequelize-cli db:seed:all`
+`npm run seeders:all`
 
 2. Para revertir la carga de datos de prueba ejecutar:
-`npx sequelize-cli db:seed:undo`
+`npm run seeders:undo`
 
 # Ejecución del proyecto en local
 El proyecto require un archivo de configuración de variables de ambiente, este deberá ser creado en la carpeta raíz del proyecto con el nombre **.env**, deberá contener las variables especificadas en el archivo **.env_example**.

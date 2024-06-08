@@ -31,7 +31,7 @@ describe('Pruebas a Example', () => {
         expect(obj).toHaveProperty('email');
         expect(obj).toHaveProperty('isBlock');
       });
-      // expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.length).toBeGreaterThan(0);
     });
   })
 });
