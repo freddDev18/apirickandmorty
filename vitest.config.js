@@ -1,8 +1,7 @@
-// No logre agregar el rule adecuado para ignorar en el .eslintrc.json
 // eslint-disable-next-line import/no-unresolved
-import { defineConfig } from 'vitest/config';
+const { defineConfig } = require('vitest/config');
 
-export default defineConfig({
+const aux = defineConfig({
   test: {
     coverage: {
       reporter: ['text'],
@@ -12,6 +11,9 @@ export default defineConfig({
       threads: {
         singleThread: true
       }
-    }
+    },
+    globals: true
   },
 })
+
+module.exports = aux;

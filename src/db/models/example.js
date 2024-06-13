@@ -1,5 +1,5 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../connections/sequelize.js';
+const { DataTypes } = require('sequelize');
+const sequelize = require('../connections/sequelize.js');
 
 const USER_TABLE = 't_usuarios';
 
@@ -31,4 +31,4 @@ const User = sequelize.define(
     },
 );
 
-export { User, UserSchema, USER_TABLE };
+module.exports = { User, UserSchema, USER_TABLE };

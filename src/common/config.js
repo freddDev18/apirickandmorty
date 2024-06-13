@@ -1,6 +1,4 @@
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+require('dotenv').config();
 
 const config = {
   env: process.env.NODE_ENV || 'dev',
@@ -13,4 +11,4 @@ const config = {
   dbRootPassword: process.env.DB_ROOT_PASSWORD
 };
 
-export default config;
+module.exports = config

@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/v1/example
 
 ### Recuperar un usuario por id (path to regex)
-GET http://localhost:3000/api/v1/example/0272b164-789b-4806-90fe-34fef29b0f1f
+GET http://localhost:3000/api/v1/example/01f441d3-83e9-4267-b360-89716ce45529
 
 ### Crear un usuario
 POST http://localhost:3000/api/v1/example
@@ -16,7 +16,7 @@ Content-Type: application/json
 }
 
 ### Actualizar parcialmente a un usuario
-PATCH  http://localhost:3000/api/v1/example/1855f050-4efa-4e3c-8355-1fbaa1595669
+PATCH  http://localhost:3000/api/v1/example/01f441d3-83e9-4267-b360-89716ce45529
 Content-Type: application/json
 
 {
@@ -26,4 +26,4 @@ Content-Type: application/json
 }
 
 ### Eliminar un usuario por id
-DELETE  http://localhost:3000/api/v1/example/0272b164-789b-4806-90fe-34fef29b0f1f
+DELETE  http://localhost:3000/api/v1/example/01f441d3-83e9-4267-b360-89716ce45529

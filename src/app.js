@@ -1,8 +1,9 @@
-import express, { json } from 'express';
-import routerApi from './routes/index.js';
-import config from './common/config.js';
-import { logErrors, errorHandler, boomErrorHandler, ormErrorHandler } from './middlewares/error.handler.js';
-import notFoundHandler from './middlewares/notFound.handler.js';
+const express = require('express');
+const { json } = require('express');
+const routerApi = require('./routes/index.js');
+const config = require('./common/config.js');
+const { logErrors, errorHandler, boomErrorHandler, ormErrorHandler } = require('./middlewares/error.handler.js');
+const notFoundHandler = require('./middlewares/notFound.handler.js');
 
 const createApp = () => {
   const app = express();
@@ -25,4 +26,4 @@ const createApp = () => {
   return app;
 };
 
-export default createApp;
+module.exports = createApp;

@@ -12,6 +12,15 @@
       "import/extensions": [2, "always", { "ignorePackages": true }],
       "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.test.js", "**/*.e2e.js"] }],
       "max-len": ["error", { "code": 120, "ignoreUrls": true }]
+    },
+    "globals": {
+      "vi": true,
+      "describe": true,
+      "it": true,
+      "expect": true,
+      "beforeAll": true,
+      "afterAll": true,
+      "test": true
     }
   }
   

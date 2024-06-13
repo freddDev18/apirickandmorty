@@ -14,4 +14,4 @@ const gracefulShutdown = (server) => {
     process.exit(1);
   }, 5000);
 };
-export default gracefulShutdown;
+module.exports = gracefulShutdown;
