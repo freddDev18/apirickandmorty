@@ -1,4 +1,4 @@
-import { ValidationError } from 'sequelize';
+const { ValidationError } = require('sequelize');
 
 // Middleware tipo error para loggear errores
 function logErrors(err, req, res, next) {
@@ -43,4 +43,4 @@ function ormErrorHandler(err, req, res, next) {
   next(err);
 }
 
-export { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };
+module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };

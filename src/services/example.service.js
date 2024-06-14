@@ -1,8 +1,8 @@
 /* eslint-disable class-methods-use-this */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { faker } from '@faker-js/faker';
-import boom from '@hapi/boom';
-import { User } from '../db/models/example.js';
+const { faker } = require('@faker-js/faker');
+const boom = require('@hapi/boom');
+const { User } = require('../db/models/example.js');
 
 class UsersService {
 
@@ -11,7 +11,7 @@ class UsersService {
       id: faker.string.uuid(),
       ...data
     }
-    this.users.push(newUser);
+    User.create(newUser);
     return newUser;
   }
 
@@ -54,4 +54,4 @@ class UsersService {
   }
 }
 
-export default UsersService;
+module.exports = UsersService;

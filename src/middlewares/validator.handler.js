@@ -1,4 +1,4 @@
-import { badRequest } from '@hapi/boom';
+const { badRequest } = require('@hapi/boom');
 
 function validatorHandler(schema, property) {
   return (req, res, next) => {
@@ -11,4 +11,4 @@ function validatorHandler(schema, property) {
   };
 }
 
-export default validatorHandler;
+module.exports = validatorHandler;

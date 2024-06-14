@@ -1,6 +1,6 @@
-import createApp from './app.js';
-import config from './common/config.js';
-import gracefulShutdown from './common/utils.js';
+const createApp = require('./app.js');
+const config = require('./common/config.js');
+const gracefulShutdown = require('./common/utils.js');
 
 const app = createApp();
 

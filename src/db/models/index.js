@@ -1,7 +1,7 @@
 /* eslint-disable import/no-dynamic-require */
-import { Sequelize } from 'sequelize';
-import { User } from './example.js';
-import sequelize from '../connections/sequelize.js';
+const { Sequelize } = require('sequelize');
+const { User } = require('./example.js');
+const sequelize = require('../connections/sequelize.js');
 
 const db = {};
 
@@ -10,4 +10,4 @@ db.User = User;
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-export default db;
+module.exports = db;

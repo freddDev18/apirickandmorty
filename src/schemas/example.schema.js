@@ -1,4 +1,4 @@
-import Joi from 'joi';
+const Joi = require('joi');
 
 const id = Joi.string().uuid();
 const fullName = Joi.string().min(3).max(100);
@@ -23,4 +23,4 @@ const findUserSchema = Joi.object({
   id: id.required(),
 });
 
-export {createUserSchema, updateUserSchema, findUserSchema}
+module.exports = { createUserSchema, updateUserSchema, findUserSchema }

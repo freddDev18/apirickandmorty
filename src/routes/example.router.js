@@ -1,20 +1,20 @@
-import { Router } from 'express';
+const { Router } = require('express');
 
-import ExampleService from '../services/example.service.js';
-import validatorHandler from '../middlewares/validator.handler.js';
-import {createUserSchema, updateUserSchema, findUserSchema} from '../schemas/example.schema.js';
+const ExampleService = require('../services/example.service.js');
+const validatorHandler = require('../middlewares/validator.handler.js');
+const { createUserSchema, updateUserSchema, findUserSchema } = require('../schemas/example.schema.js');
 
 const router = Router();
 const service = new ExampleService();
 
-router.get('/', async ( req, res ) => {
+router.get('/', async (req, res) => {
   const users = await service.find();
   res.json(users);
 });
 
 router.get('/:id',
   validatorHandler(findUserSchema, 'params'),
-  async ( req, res, next ) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const user = await service.findOne(id);
@@ -27,7 +27,7 @@ router.get('/:id',
 
 router.post('/',
   validatorHandler(createUserSchema, 'body'),
-  async ( req, res ) => {
+  async (req, res) => {
     const { body } = req;
     const newUser = await service.create(body);
     res.status(201).json(newUser);
@@ -37,7 +37,7 @@ router.post('/',
 router.patch('/:id',
   validatorHandler(findUserSchema, 'params'),
   validatorHandler(updateUserSchema, 'body'),
-  async ( req, res, next ) => {
+  async (req, res, next) => {
     try {
       const { id } = req.params;
       const { body } = req;
@@ -49,7 +49,7 @@ router.patch('/:id',
   }
 )
 
-router.delete('/:id', async ( req, res, next ) => {
+router.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
     const rta = await service.delete(id);
@@ -59,4 +59,4 @@ router.delete('/:id', async ( req, res, next ) => {
   }
 })
 
-export default router;
+module.exports = router;

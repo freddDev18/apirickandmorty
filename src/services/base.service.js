@@ -1,5 +1,5 @@
-import axios from 'axios';
-import config from '../common/config.js';
+const axios = require('axios');
+const config = require('../common/config.js');
 
 class BaseService {
   constructor() {
@@ -9,4 +9,4 @@ class BaseService {
     });
   }
 }
-export default BaseService;
+module.exports = BaseService;
