@@ -1,0 +1,346 @@
+openapi: 3.0.3
+info:
+  title: Usuarios API
+  description: Ejemplo de contrato sobre usuarios fakers
+  contact:
+    name: Antonio Obregón
+    email: antonio.obregon@utict.unam.mx
+  version: 1.0.0
+servers:
+  - url: http://{servername}.patronato.unam.mx:{port}/{version}
+    description: Servidor de pruebas
+    variables:
+      servername:
+        # note! no enum here means it is an open value
+        default: spdesarrollo-js
+        description: Nombre del servidor API
+      port:
+        default: "4001"
+      version:
+        default: v1
+tags:
+  - name: example
+    description: Todo sobre los usuarios fakers
+paths:
+  /example:
+    get:
+      tags:
+        - example
+      summary: Obtiene una lista de usuarios.
+      description: Devuelve una lista de objectos de usuarios disponibles.
+      operationId: getUsers
+      responses:
+        "200":
+          $ref: "#/components/responses/UsuariosResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+    post:
+      tags:
+        - example
+      summary: Crea un nuevo usuario
+      description: Agrega un nuevo usuario
+      operationId: addUser
+      requestBody:
+        $ref: "#/components/requestBodies/CrearUsuarioRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/CrearUsuarioResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+  /example/findById:
+    get:
+      tags:
+        - example
+      summary: Obtiene un usuario por ID.
+      description: Devuelve un usuario por ID.
+      operationId: findUserById
+      parameters:
+          - $ref: "#/components/parameters/query"
+      responses:
+        "200":
+          $ref: "#/components/responses/UsuarioResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+  /example/{id}:
+    get:
+      tags:
+        - example
+      summary: Obtiene un usuario por ID.
+      description: Devuelve un usuario por ID.
+      operationId: getUserById
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          $ref: "#/components/responses/UsuarioResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+    patch:
+      tags:
+        - example
+      summary: Actualiza porción o total de un usuario existente
+      description: Actualiza una porción o el total de los datos de un usuario existente
+      operationId: updateUserById
+      parameters:
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        $ref: "#/components/requestBodies/ActualizarUsuarioRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/ActualizarUsuarioResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+    delete:
+      tags:
+        - example
+      summary: Elimina un usuario por ID
+      description: Elimina un usuario identificado por un ID
+      operationId: deleteUserById
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          $ref: "#/components/responses/EliminarUsuarioResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableContent"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        default:
+          $ref: "#/components/responses/Default"
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/uuid'
+    query:
+      name: id
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/uuid'
+  schemas:
+    uuid:
+      type: string
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      minLength: 36
+      maxLength: 36
+      example: 663d5363-ea3b-43f5-be04-3e7ccef942cc
+    Usuario:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uuid'
+        fullName:
+          type: string
+          description: Nombre completo.
+          example: "Hal Finney"
+        jobArea:
+          type: string
+          description: Departamento de trabajo.
+          example: "Cypherpunk"
+        email:
+          type: string
+          format: email
+          description: Correo electronico.
+          example: "Hal-Finney@yahoo.com"
+        isBlock:
+          type: boolean
+    ErrorModel:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Código del error
+        message:
+          type: string
+          description: Descripción detallada del error
+  requestBodies:
+    CrearUsuarioRequest:
+      description: Datos para la creación de un usuario
+      content:
+        application/json:
+          schema:
+            allOf:
+            - $ref: '#/components/schemas/Usuario'
+            - type: object
+              properties:
+                id:
+                  readOnly: true
+                fullName:
+                  writeOnly: true
+                jobArea:
+                  writeOnly: true
+                email:
+                  writeOnly: true
+                isBlock:
+                  readOnly: true
+              required:
+              - fullName
+              - jobArea
+              - email
+      required: true
+    ActualizarUsuarioRequest:
+      description: Request body para la actualización de una porción del usuario
+      content:
+        application/json:
+          schema:
+            allOf:
+            - $ref: '#/components/schemas/Usuario'
+            - type: object
+              properties:
+                id:
+                  readOnly: true
+      required: true
+  responses:
+    UsuarioResponse:
+      description: Usuario
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Usuario"
+    UsuariosResponse:
+      description: Usuarios disponibles.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Usuario"
+    CrearUsuarioResponse:
+      description: Usuario creado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Usuario"
+    ActualizarUsuarioResponse:
+      description: Usuario actualizado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Usuario"
+    EliminarUsuarioResponse:
+      description: Usuario eliminado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                $ref: '#/components/schemas/uuid'
+    BadRequest:
+      description: Petición incorrecta
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorModel"
+              - type: object
+                properties:
+                  code:
+                    example: 400
+                  message:
+                    enum:
+                      - Parámetros inválidos
+                      - Parámetros requeridos
+                    example: Parámetros inválidos
+    NotFound:
+      description: El recurso especificado no fue encontrado
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorModel"
+              - type: object
+                properties:
+                  code:
+                    example: 404
+                  message:
+                    example: Recurso no localizado
+    Conflict:
+      description: Ocurrio un error en el estado del recurso
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorModel"
+              - type: object
+                properties:
+                  code:
+                    example: 409
+                  message:
+                    example: Intento de registro duplicado
+    UnprocessableContent:
+      description: Ocurrio una restricción en la petición por reglas de negocio
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorModel"
+              - type: object
+                properties:
+                  code:
+                    example: 422
+                  message:
+                    example: La petición fue registrada previamente
+    ServerError:
+      description: Error interno en el servidor
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ErrorModel"
+              - type: object
+                properties:
+                  code:
+                    example: 500
+                  message:
+                    example: Error interno en el servidor
+    Default:
+      description: Error inesperado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorModel"
