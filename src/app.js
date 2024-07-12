@@ -2,7 +2,9 @@ const express = require('express');
 const { json } = require('express');
 const routerApi = require('./routes/index.js');
 const config = require('./common/config.js');
-const { logErrors, errorHandler, boomErrorHandler, ormErrorHandler } = require('./middlewares/error.handler.js');
+const {
+  logErrors, errorHandler, boomErrorHandler,
+  ormErrorHandler, dbErrorHandler } = require('./middlewares/error.handler.js');
 const notFoundHandler = require('./middlewares/notFound.handler.js');
 
 const createApp = () => {
@@ -20,6 +22,7 @@ const createApp = () => {
 
   app.use(logErrors);
   app.use(ormErrorHandler);
+  app.use(dbErrorHandler);
   app.use(boomErrorHandler);
   app.use(errorHandler);
 

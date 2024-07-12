@@ -33,7 +33,7 @@ function boomErrorHandler(err, req, res, next) {
 }
 
 function ormErrorHandler(err, req, res, next) {
-  if (err instanceof ValidationError || err instanceof DatabaseError) {
+  if (err instanceof ValidationError) {
     res.status(409).json({
       code: 409,
       message: err.message,
@@ -44,4 +44,16 @@ function ormErrorHandler(err, req, res, next) {
   }
 }
 
-module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };
+function dbErrorHandler(err, req, res, next) {
+  if (err instanceof DatabaseError) {
+    res.status(422).json({
+      code: 422,
+      message: err.message,
+      errors: err.errors,
+    });
+  } else {
+    next(err);
+  }
+}
+
+module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler, dbErrorHandler };

@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/v1/example
 
 ### Recuperar un usuario por id (path to regex)
-GET http://localhost:3000/api/v1/example/01f441d3-83e9-4267-b360-89716ce45529
+GET http://localhost:3000/api/v1/example/28ce4e4c-9de4-4baa-a64b-7df8174db4a0"
 
 ### Crear un usuario
 POST http://localhost:3000/api/v1/example
