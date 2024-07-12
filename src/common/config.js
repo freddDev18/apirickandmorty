@@ -8,7 +8,8 @@ const config = {
   dbName: process.env.DB_NAME,
   dbUser: process.env.DB_USER,
   dbPassword: process.env.DB_PASSWORD,
-  dbRootPassword: process.env.DB_ROOT_PASSWORD
+  dbRootPassword: process.env.DB_ROOT_PASSWORD,
+  isProd: process.env.NODE_ENV === 'production',
 };
 
 module.exports = config

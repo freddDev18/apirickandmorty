@@ -1,4 +1,4 @@
-const { ValidationError } = require('sequelize');
+const { ValidationError, DatabaseError } = require('sequelize');
 
 // Middleware tipo error para loggear errores
 function logErrors(err, req, res, next) {
@@ -33,14 +33,15 @@ function boomErrorHandler(err, req, res, next) {
 }
 
 function ormErrorHandler(err, req, res, next) {
-  if (err instanceof ValidationError) {
+  if (err instanceof ValidationError || err instanceof DatabaseError) {
     res.status(409).json({
       code: 409,
-      message: err.name,
+      message: err.message,
       errors: err.errors,
     });
+  } else {
+    next(err);
   }
-  next(err);
 }
 
 module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };
