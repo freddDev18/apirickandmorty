@@ -3,9 +3,9 @@ const { json } = require('express');
 const routerApi = require('./routes/index.js');
 const config = require('./common/config.js');
 const {
-  logErrors, errorHandler, boomErrorHandler,
-  ormErrorHandler, dbErrorHandler } = require('./middlewares/error.handler.js');
-const notFoundHandler = require('./middlewares/notFound.handler.js');
+  logErrors, notFoundHandler, errorHandler, boomErrorHandler, ormErrorHandler, dbErrorHandler,
+} = require('./middlewares/error.handler.js');
+
 
 const createApp = () => {
   const app = express();
@@ -18,9 +18,8 @@ const createApp = () => {
   app.use(json());
   routerApi(app);
 
-  app.use(notFoundHandler);
-
   app.use(logErrors);
+  app.use(notFoundHandler);
   app.use(ormErrorHandler);
   app.use(dbErrorHandler);
   app.use(boomErrorHandler);
