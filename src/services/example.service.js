@@ -16,9 +16,8 @@ class UsersService {
   }
 
   async find() {
-    const data = await User.findAll(
-    );
-    return data;
+    const data = await User.findAll();
+    return { data };
   }
 
   async findOne(id) {

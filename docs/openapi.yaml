@@ -149,6 +149,9 @@ components:
       maxLength: 36
       example: 663d5363-ea3b-43f5-be04-3e7ccef942cc
     Usuario:
+      type: object
+      required:
+        - fullName
       properties:
         id:
           $ref: '#/components/schemas/uuid'
@@ -168,6 +171,7 @@ components:
         isBlock:
           type: boolean
     ErrorModel:
+      type: object
       properties:
         code:
           type: string
@@ -229,10 +233,11 @@ components:
           schema:
             $ref: '#/components/schemas/Usuario'
     UsuariosResponse:
-      description: Usuarios disponibles.
+      description: Lista de usuarios
       content:
         application/json:
           schema:
+            type: object
             properties:
               data:
                 type: array
