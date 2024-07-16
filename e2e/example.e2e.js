@@ -22,14 +22,14 @@ describe('Pruebas a Example', () => {
       expect(response).toBeTruthy();
       expect(response.statusCode).toBe(200);
       expect(typeof response.body).toBe('object');
-      response.body.forEach((obj) => {
+      response.body.data.forEach((obj) => {
         expect(obj).toHaveProperty('id');
         expect(obj).toHaveProperty('fullName');
         expect(obj).toHaveProperty('jobArea');
         expect(obj).toHaveProperty('email');
         expect(obj).toHaveProperty('isBlock');
       });
-      expect(response.body.length).toBeGreaterThan(0);
+      expect(response.body.data.length).toBeGreaterThan(0);
     });
   })
 });
