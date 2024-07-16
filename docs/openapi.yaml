@@ -218,6 +218,8 @@ components:
               properties:
                 id:
                   readOnly: true
+                isBlock:
+                  readOnly: true
       required: true
   responses:
     UsuarioResponse:

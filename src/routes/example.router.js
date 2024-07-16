@@ -7,10 +7,18 @@ const { createUserSchema, updateUserSchema, findUserSchema } = require('../schem
 const router = Router();
 const service = new ExampleService();
 
-router.get('/', async (req, res) => {
-  const users = await service.find();
-  res.json(users);
-});
+router.get('/findById',
+  validatorHandler(findUserSchema, 'query'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.query;
+      const user = await service.findOne(id);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 router.get('/:id',
   validatorHandler(findUserSchema, 'params'),
@@ -24,6 +32,11 @@ router.get('/:id',
     }
   }
 );
+
+router.get('/', async (req, res) => {
+  const users = await service.find();
+  res.json(users);
+});
 
 router.post('/',
   validatorHandler(createUserSchema, 'body'),
