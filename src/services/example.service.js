@@ -16,7 +16,10 @@ class UsersService {
   }
 
   async find() {
-    const data = await User.findAll();
+    const data = await User.findAll(
+      // Only for Test Schema Validator in APIM
+      // { attributes: ['id', ['fullName', 'nombreCompleto'], 'email'] }
+    );
     return { data };
   }
 
