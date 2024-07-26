@@ -13,3 +13,13 @@ services:
       - 3306:3306
     volumes:
       - ./src/db/data:/var/lib/mysql
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./src/db/data:/var/lib/postgresql/data

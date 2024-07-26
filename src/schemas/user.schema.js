@@ -7,20 +7,20 @@ const email = Joi.string().email();
 const isBlock = Joi.bool();
 
 const createUserSchema = Joi.object({
-  fullName: fullName.required(),
-  jobArea: jobArea.required(),
-  email: email.required(),
-  isBlock
+    fullName: fullName.required(),
+    jobArea: jobArea.required(),
+    email: email.required(),
+    isBlock,
 });
 
 const updateUserSchema = Joi.object({
-  fullName,
-  jobArea,
-  email
+    fullName,
+    jobArea,
+    email,
 });
 
 const findUserSchema = Joi.object({
-  id: id.required(),
+    id: id.required(),
 });
 
-module.exports = { createUserSchema, updateUserSchema, findUserSchema }
+module.exports = { createUserSchema, updateUserSchema, findUserSchema };

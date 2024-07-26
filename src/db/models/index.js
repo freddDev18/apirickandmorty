@@ -1,13 +1,10 @@
-/* eslint-disable import/no-dynamic-require */
-const { Sequelize } = require('sequelize');
-const { User } = require('./example.js');
-const sequelize = require('../connections/sequelize.js');
+const { User } = require('./user.model.js');
+const { Student } = require('./student.model.js');
+const { Subject } = require('./subject.model.js');
 
-const db = {};
+User.hasOne(Student);
+Student.belongsTo(User);
+Student.belongsToMany(Subject, { through: 'StudentsSubjects' });
+Subject.belongsToMany(Student, { through: 'StudentsSubjects' });
 
-db.User = User;
-
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-module.exports = db;
+module.exports = { User, Student, Subject };

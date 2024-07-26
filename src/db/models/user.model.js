@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../connections/sequelize.js');
 
-const USER_TABLE = 't_usuarios';
+const USER_TABLE = 'users';
 
 const UserSchema = {
     id: {
@@ -19,12 +19,13 @@ const UserSchema = {
     },
     isBlock: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false
-    }
+        defaultValue: false,
+    },
 };
 
 const User = sequelize.define(
-    'Users', UserSchema,
+    'user',
+    UserSchema,
     {
         tableName: USER_TABLE,
         timestamps: false,
