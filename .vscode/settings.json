@@ -1,9 +1,11 @@
 {
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll": "explicit"
+        "source.organizeImports": "explicit",
+        "source.fixAll": "never"
     },
-    "eslint.validate": [
-        "javascript"
-    ],
+    "eslint.format.enable": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "prettier.enable": false,
     "files.eol": "\n",
 }

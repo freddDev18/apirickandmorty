@@ -1,51 +1,26 @@
 {
     "env": {
-        "es2021": true,
-        "node": true
+      "es2021": true,
+      "node": true
     },
-    "extends": [
-        "airbnb-base"
-    ],
+    "extends": ["airbnb-base"],
     "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
+      "ecmaVersion": "latest",
+      "sourceType": "module"
     },
     "rules": {
-        "import/extensions": [
-            2,
-            "always",
-            {
-                "ignorePackages": true
-            }
-        ],
-        "import/no-extraneous-dependencies": [
-            "error",
-            {
-                "devDependencies": [
-                    "**/*.test.js",
-                    "**/*.e2e.js"
-                ]
-            }
-        ],
-        "max-len": [
-            "error",
-            {
-                "code": 180,
-                "ignoreUrls": true
-            }
-        ],
-        "indent": [
-            "error",
-            4
-        ]
+      "import/extensions": [2, "always", { "ignorePackages": true }],
+      "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.test.js", "**/*.e2e.js"] }],
+      "max-len": ["error", { "code": 180, "ignoreUrls": true }],
+      "indent": ["error", 4]
     },
     "globals": {
-        "vi": true,
-        "describe": true,
-        "it": true,
-        "expect": true,
-        "beforeAll": true,
-        "afterAll": true,
-        "test": true
+      "vi": true,
+      "describe": true,
+      "it": true,
+      "expect": true,
+      "beforeAll": true,
+      "afterAll": true,
+      "test": true
     }
 }
