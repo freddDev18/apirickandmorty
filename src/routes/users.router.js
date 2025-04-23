@@ -1,15 +1,12 @@
 const { Router } = require('express');
 
-const UserService = require('../services/user.service.js');
-const validatorHandler = require('../middlewares/validator.handler.js');
-const { createUserSchema, updateUserSchema, findUserSchema } = require('../schemas/user.schema.js');
+const UserService = require('../services/users.service.js');
 
 const router = Router();
 const service = new UserService();
 
 router.get(
   '/findById',
-  validatorHandler(findUserSchema, 'query'),
   async (req, res, next) => {
     try {
       const { id } = req.query;
@@ -23,7 +20,6 @@ router.get(
 
 router.get(
   '/:id',
-  validatorHandler(findUserSchema, 'params'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -42,7 +38,6 @@ router.get('/', async (req, res) => {
 
 router.post(
   '/',
-  validatorHandler(createUserSchema, 'body'),
   async (req, res) => {
     const { body } = req;
     const newUser = await service.create(body);
@@ -52,8 +47,6 @@ router.post(
 
 router.patch(
   '/:id',
-  validatorHandler(findUserSchema, 'params'),
-  validatorHandler(updateUserSchema, 'body'),
   async (req, res, next) => {
     try {
       const { id } = req.params;
