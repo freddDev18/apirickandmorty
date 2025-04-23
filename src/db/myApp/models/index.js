@@ -1,6 +1,6 @@
-const { User } = require('./user.model.js');
-const { Student } = require('./student.model.js');
-const { Subject } = require('./subject.model.js');
+const { User } = require('./User.model.js');
+const { Student } = require('./Student.model.js');
+const { Subject } = require('./Subject.model.js');
 
 User.hasOne(Student);
 Student.belongsTo(User);

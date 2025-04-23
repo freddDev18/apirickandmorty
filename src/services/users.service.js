@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { faker } = require('@faker-js/faker');
 const boom = require('@hapi/boom');
-const { User } = require('../db/models/index.js');
+const { User } = require('../db/myApp/models/index.js');
 
 class UsersService {
   async create(data) {

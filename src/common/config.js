@@ -18,6 +18,15 @@ const appConfig = {
   port: process.env.PORT || 3000,
 };
 
+const myAppConfig = {
+  dbHost: process.env.DB_HOST_APP,
+  dbPort: process.env.DB_PORT_APP || 3306,
+  dbName: process.env.DB_NAME_APP,
+  dbUser: process.env.DB_USER_APP,
+  dbPassword: process.env.DB_PASSWORD_APP,
+};
+
 module.exports = {
   appConfig,
+  myAppConfig,
 };
