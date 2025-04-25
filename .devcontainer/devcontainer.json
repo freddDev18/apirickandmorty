@@ -20,8 +20,7 @@
   // This can be used to network with other containers or with the host.
   "forwardPorts": [
     3000,
-    3306,
-    3309
+    3306
   ],
   "portsAttributes": {
     "3000": {
@@ -29,10 +28,6 @@
       "protocol": "http"
     },
     "3306": {
-      "label": "Dev MySQL Database",
-      "protocol": "http"
-    },
-    "3309": {
       "label": "Dev MySQL Database",
       "protocol": "http"
     }

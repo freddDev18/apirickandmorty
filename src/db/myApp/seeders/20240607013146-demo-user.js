@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-unused-vars */
 const { faker } = require('@faker-js/faker');
-const { UserSchema, USER_TABLE } = require('../models/User.model.js');
+const { USER_TABLE } = require('../models/User.model.js');
 
 module.exports = {
   async up(queryInterface, Sequelize) {

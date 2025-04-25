@@ -13,6 +13,7 @@ const aux = defineConfig({
       },
     },
     globals: true,
+    setupFiles: './e2e/test/setup.js',
   },
 });
 
