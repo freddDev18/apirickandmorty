@@ -19,12 +19,12 @@ services:
     image: mysql:lts
     restart: unless-stopped
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
     env_file:
-      - .env
+      - .env.container
     ports:
       - "3307:3306"
   db-e2e:
@@ -32,11 +32,11 @@ services:
     restart: unless-stopped
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}_test
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
     env_file:
-      - .env
+      - .env.container
     ports:
       - "3308:3306"
   
