@@ -4,7 +4,7 @@ const { faker } = require('@faker-js/faker');
 const { USER_TABLE } = require('../models/User.model.js');
 
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  up: async (queryInterface) => {
     if (queryInterface.context) {
       // eslint-disable-next-line no-param-reassign
       queryInterface = queryInterface.context;
@@ -23,7 +23,7 @@ module.exports = {
     await queryInterface.bulkInsert(USER_TABLE, users, {});
   },
 
-  async down(queryInterface, Sequelize) {
+  down: async (queryInterface) => {
     await queryInterface.bulkDelete(USER_TABLE, null, {});
   },
 };
