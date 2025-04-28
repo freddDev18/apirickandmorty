@@ -28,7 +28,7 @@ describe('Pruebas a users', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.id).toBe(userId);
     });
-    test('Debería retornar la respuesta esperada y estatus 404', async () => {
+    test('Debería retornar la respuesta esperada y estatus 404 con un id inexistente', async () => {
       const fakeId = '349fff85-c413-480e-a15d-28124de10000';
       const response = await api.get(`${usersEndPoint}/${fakeId}`).query();
 
@@ -38,7 +38,7 @@ describe('Pruebas a users', () => {
       expect(response.body).toHaveProperty('code');
       expect(response.body.code).toBe('404');
     });
-    test('Debería retornar la respuesta esperada y estatus 400', async () => {
+    test('Debería retornar la respuesta esperada y estatus 400 con un id no válido', async () => {
       const response = await api.get(`${usersEndPoint}/1234567890`).query();
 
       expect(response).toBeTruthy();
