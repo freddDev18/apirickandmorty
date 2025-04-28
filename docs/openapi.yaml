@@ -7,7 +7,7 @@ info:
     email: antonio.obregon@utict.unam.mx
   version: 1.0.0
 servers:
-  - url: http://{servername}.patronato.unam.mx:{port}/{version}
+  - url: http://{servername}.patronato.unam.mx:{port}/api/{version}
     description: Servidor de pruebas
     variables:
       servername:
@@ -32,8 +32,10 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UsuariosResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'  
+        '500':
+          $ref: '#/components/responses/ServerError'  
         default:
           $ref: '#/components/responses/Default'
     post:
@@ -53,22 +55,6 @@ paths:
           $ref: '#/components/responses/UnprocessableContent'
         '500':
           $ref: '#/components/responses/ServerError'
-  /users/findById:
-    get:
-      tags:
-        - users
-      summary: Obtiene un usuario por ID.
-      description: Devuelve un usuario por ID.
-      operationId: findUserById
-      parameters:
-          - $ref: '#/components/parameters/query'
-      responses:
-        '200':
-          $ref: '#/components/responses/UsuarioResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Default'
   /users/{id}:
     get:
       tags:
@@ -83,6 +69,10 @@ paths:
           $ref: '#/components/responses/UsuarioResponse'
         '404':
           $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest' 
+        '500':
+          $ref: '#/components/responses/ServerError'   
         default:
           $ref: '#/components/responses/Default'
     patch:
