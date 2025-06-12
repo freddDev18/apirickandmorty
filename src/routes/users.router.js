@@ -6,6 +6,19 @@ const router = Router();
 const service = new UserService();
 
 router.get(
+  '/findById',
+  async (req, res, next) => {
+    try {
+      const { id } = req.query;
+      const user = await service.findOne(id);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
   '/:id',
   async (req, res, next) => {
     try {

@@ -1,9 +1,9 @@
 const { Sequelize } = require('sequelize');
-const { myAppConfig, appConfig } = require('../../../common/config.js');
+const { usersConfig, appConfig } = require('../../../common/config.js');
 
 const options = {
-  host: myAppConfig.dbHost,
-  port: myAppConfig.dbPort,
+  host: usersConfig.dbHost,
+  port: usersConfig.dbPort,
   dialect: 'mysql',
   dialectOptions: {
     decimalNumbers: true, // Convierte automáticamente DECIMAL a números
@@ -13,9 +13,9 @@ const options = {
 };
 
 const sequelize = new Sequelize(
-  myAppConfig.dbName,
-  myAppConfig.dbUser,
-  myAppConfig.dbPassword,
+  usersConfig.dbName,
+  usersConfig.dbUser,
+  usersConfig.dbPassword,
   options,
 );
 

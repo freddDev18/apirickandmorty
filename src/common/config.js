@@ -18,7 +18,7 @@ const appConfig = {
   port: process.env.PORT || 3000,
 };
 
-const myAppConfig = {
+const usersConfig = {
   dbHost: process.env.DB_HOST_APP,
   dbPort: process.env.DB_PORT_APP || 3306,
   dbName: process.env.DB_NAME_APP,
@@ -28,5 +28,5 @@ const myAppConfig = {
 
 module.exports = {
   appConfig,
-  myAppConfig,
+  usersConfig,
 };

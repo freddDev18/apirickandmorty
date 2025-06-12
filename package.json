@@ -15,9 +15,14 @@
         "migrations:run": "sequelize-cli db:migrate",
         "migrations:revert": "sequelize-cli db:migrate:undo",
         "migrations:delete": "sequelize-cli db:migrate:undo:all",
+        "seeders:generate": "sequelize-cli seed:generate --name",
         "seeders:all": "npx sequelize-cli db:seed:all",
         "seeders:undo": "npx sequelize-cli db:seed:undo",
-        "db:setup": "docker-compose up -d mysql && npm run migrations:run && npm run seeders:all"
+        "db:create": "docker compose -f .devcontainer/docker-compose.yml up -d --build db",
+        "db:drop": "docker compose -f .devcontainer/docker-compose.yml down db",
+        "db:up": "npm run migrations:run && npm run seeders:all",
+        "db:down": "npm run migrations:delete",
+        "db:reset": "npm run db:down && npm run db:up"
     },
     "devDependencies": {
         "@commitlint/cli": "^19.3.0",
@@ -46,7 +51,6 @@
         "dotenv": "^16.3.2",
         "express": "^4.19.2",
         "express-openapi-validator": "^5.4.3",
-        "joi": "^17.12.0",
         "js-yaml": "^4.1.0",
         "mysql2": "^3.9.7",
         "pg": "^8.12.0",

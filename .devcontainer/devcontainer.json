@@ -32,13 +32,15 @@
       "protocol": "http"
     }
   },
-  // Use 'postCreateCommand' to run commands after the container is created.
+  
+	// Commands to run when the container is created or started.
+	// These commands can be used to install dependencies, run migrations, or start services.
   "initializeCommand": "echo 'Initializing container...'",
   "onCreateCommand": "npm install",
-  // "postCreateCommand": "npm run migrations:run && npm run seeders:all",
-  // "postStartCommand": "npm run dev",
-  // Configure tool-specific properties.
-  // "customizations": {},
+  "postCreateCommand": "npm run db:reset",
+  "postStartCommand": "npm run dev",
+  
+	// Configure tool-specific properties.
   "customizations": {
     "vscode": {
       "settings": {
@@ -55,7 +57,15 @@
     }
   },
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+		// Fix:
+		// If you are using a Mac or Linux OS, uncomment the line below to mount your SSH keys.
+		// This allows you to use your SSH keys inside the container for git operations.
+		"source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+		
+		// If you are using a Windows OS, uncomment the line below to mount your SSH keys.
+		// This allows you to use your SSH keys inside the container for git operations.
+		// "source=${localEnv:USERPROFILE}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached" 
+
   ],
   "remoteUser": "node"
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
