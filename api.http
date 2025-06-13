@@ -1,25 +1,39 @@
+@hostname = {{$dotenv HOST}}
+@port = {{$dotenv PORT}}
+@baseUrl = http://{{hostname}}:{{port}}
+
+### Health Check
+GET {{baseUrl}}/api/v1
+
 ### Recuperar todos los usuarios
-GET http://localhost:3000/api/v1/example
+# @name getAll
+GET {{baseUrl}}/api/v1/users
 
-### Recuperar un usuario por path parameter
-GET http://localhost:3000/api/v1/example/5ca97b7b-6a79-4202-94ae-d0bcee165ea4
 
-### Recuperar un usuario por query parameter
-GET http://localhost:3000/api/v1/example/findById?id=5ca97b7b-6a79-4202-94ae-d0bcee165ea4
+### Recuperar el primer usuario
+# @name getFirstUser
+@firstUserId = {{ getAll.response.body.data.$[0].id }}
+GET {{baseUrl}}/api/v1/users/{{firstUserId}}
+
+### Recuperar el segundo usuario
+# @name getSecondUser
+@secondUserId = {{ getAll.response.body.data.$[1].id }}
+GET {{baseUrl}}/api/v1/users/findById?id={{secondUserId}}
 
 ### Crear un usuario
-POST http://localhost:3000/api/v1/example
+POST {{baseUrl}}/api/v1/users
 Content-Type: application/json
 
 {
   "fullName": "Hal Finney",
   "jobArea": "Cypherpunk",
-  "email": "Hal-Finney@yahoo.com",
-  "isBlock": true
+  "email": "Hal-Finney@yahoo.com"
 }
 
-### Actualizar parcialmente a un usuario
-PATCH  http://localhost:3000/api/v1/example/5ca97b7b-6a79-4202-94ae-d0bcee165ea4
+### Actualizar el tercer usuario
+# @name updateThirdUser
+@thirdUserId = {{ getAll.response.body.data.$[2].id }}
+PATCH  {{baseUrl}}/api/v1/users/{{thirdUserId}}
 Content-Type: application/json
 
 {
@@ -28,5 +42,7 @@ Content-Type: application/json
   "email": "David-Chaum@yahoo.com"
 }
 
-### Eliminar un usuario por id
-DELETE  http://localhost:3000/api/v1/example/5ca97b7b-6a79-4202-94ae-d0bcee165ea4
+### Eliminar el primer usuario
+@firstUserId = {{ getAll.response.body.data.$[0].id }}
+DELETE  {{baseUrl}}/api/v1/users/{{firstUserId}}
+

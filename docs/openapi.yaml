@@ -7,38 +7,40 @@ info:
     email: antonio.obregon@utict.unam.mx
   version: 1.0.0
 servers:
-  - url: http://{servername}.patronato.unam.mx:{port}/{version}
+  - url: http://{servername}:{port}/api/{version}
     description: Servidor de pruebas
     variables:
       servername:
         # note! no enum here means it is an open value
-        default: spdesarrollo-js
+        default: localhost
         description: Nombre del servidor API
       port:
-        default: '4001'
+        default: '3000'
       version:
         default: v1
 tags:
-  - name: example
+  - name: users
     description: Todo sobre los usuarios fakers
 paths:
-  /example:
+  /users:
     get:
       tags:
-        - example
+        - users
       summary: Obtiene una lista de usuarios.
       description: Devuelve una lista de objectos de usuarios disponibles.
       operationId: getUsers
       responses:
         '200':
           $ref: '#/components/responses/UsuariosResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'  
+        '500':
+          $ref: '#/components/responses/ServerError'  
         default:
           $ref: '#/components/responses/Default'
     post:
       tags:
-        - example
+        - users
       summary: Crea un nuevo usuario
       description: Agrega un nuevo usuario
       operationId: addUser
@@ -53,10 +55,10 @@ paths:
           $ref: '#/components/responses/UnprocessableContent'
         '500':
           $ref: '#/components/responses/ServerError'
-  /example/findById:
+  /users/findById:
     get:
       tags:
-        - example
+        - users
       summary: Obtiene un usuario por ID.
       description: Devuelve un usuario por ID.
       operationId: findUserById
@@ -69,10 +71,10 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Default'
-  /example/{id}:
+  /users/{id}:
     get:
       tags:
-        - example
+        - users
       summary: Obtiene un usuario por ID.
       description: Devuelve un usuario por ID.
       operationId: getUserById
@@ -83,11 +85,15 @@ paths:
           $ref: '#/components/responses/UsuarioResponse'
         '404':
           $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest' 
+        '500':
+          $ref: '#/components/responses/ServerError'   
         default:
           $ref: '#/components/responses/Default'
     patch:
       tags:
-        - example
+        - users
       summary: Actualiza porción o total de un usuario existente
       description: Actualiza una porción o el total de los datos de un usuario existente
       operationId: updateUserById
@@ -110,7 +116,7 @@ paths:
           $ref: '#/components/responses/ServerError'
     delete:
       tags:
-        - example
+        - users
       summary: Elimina un usuario por ID
       description: Elimina un usuario identificado por un ID
       operationId: deleteUserById

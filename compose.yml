@@ -1,0 +1,26 @@
+services:
+  api:
+    image: harbor-utict.patronato.unam.mx/myproject/api:1.0.0
+    pull_policy: always
+    # Solo descomentar si se quiere construir la imagen localmente
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    labels:
+      - "traefik.http.routers.my-api-http.rule=Host(.my-api.${HOST}`)||Host(.my-api.${HOST}.patronato.unam.mx`)"
+      - "traefik.http.routers.my-api-http.entrypoints=web"
+    env_file:
+      - .env
+    volumes:
+      - app_logs:/opt/app/logs
+    restart: always
+    networks:
+      - proxy-net
+    environment:
+      - TZ=America/Mexico_City
+volumes:
+  app_logs:
+    name: api-logs
+networks:
+  proxy-net:
+    external: true

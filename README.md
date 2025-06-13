@@ -1,99 +1,85 @@
-# Sobre el template (borrar)
-Este proyecto tiene por objeto servir como código base para proyectos Backend utilizando las siguientes tecnologías:
+El proyecto usa el framework **ExpressJS** para Node.js, un entorno de ejecución de JavaScript de código abierto bajo licencia MIT. ExpressJS es útil para el desarrollo de APIs y proporciona una serie de características robustas para aplicaciones web y móviles.
 
-- Express
-- [Faker](https://fakerjs.dev/): biblioteca para crear datos ficticios, esta deberá ser eliminada si no se requiere
-- [hapi/boom](https://www.npmjs.com/package/@hapi/boom): manejador de errores que nos permite es manejar errores de forma amigable.
-- [Joi](https://joi.dev/): es un object schema validation. Es la librería que nos va a ayudar a validar los esquemas.
-- Husky, Airbnb, commit linter: herramientas para revisión de calidad de código y de mensajes de los commits.
-- [Vitest](https://vitest.dev/): biblioteca para pruebas unitarias
+# Ejecución local  
+- **Preparación**
+  - Crear el archivo **.env** en la raíz del proyecto, utilice el archivo **.env.example** para crear las variables y asignarles el valor requerido.
+  - Instalar extensión [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) para Visual Studio Code
+- **Ejecución**
+  - En terminal, a nivel de la raíz del proyecto, deberá ejecutar los siguientes comandos:
+    - `npm install` para instalar dependencias
+    - `npm run db:create` para crear base de datos en contenedor Docker
+    - `npm run db:reset` para crear tablas y sembrado de datos
+    - `npm run dev` para iniciar el proyecto en local
+  
+  - En terminal, observará un mensaje que indica que el servicio esta disponible para responder solicitudes, por ejemplo:
+    ```bash
+    Server ExpressJS is listening on port http://localhost:3000/
+    ```
+- **Prueba manual**
+  - Abrir el archivo **api.http** localizado en la raíz del proyecto, utilizado para probar los endpoints de la API con la extensión `REST Client`
+  - Oprimir el enlace **Send Request** del endpoint que se desea probar.
+
+# Ejecución en devcontainer
+Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Docker, proporcionando un entorno de desarrollo consistente y aislado. Para construir y ejecutar tu aplicación localmente utilizando Dev Containers, sigue estos pasos:
+
+- **Instalar extensiones necesarias**:
+    - Asegúrate de tener instalado Docker en tu máquina.
+    - Instala la extensión de Visual Studio Code [Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+
+- **Abrir proyecto en el contenedor**:
+     - Abre Visual Studio Code y carga tu proyecto.
+     - Presiona `F1` y selecciona `Dev Containers: Reopen in Container`.
+
+- **Iniciar aplicación**:
+     - Si tu aplicación no inicia, abre una terminal en Visual Studio Code y ejecuta: `npm run dev`
+     - La aplicación estará disponible en http://localhost:3000
 
 
-## Organización de directorios y reglas generales
-- docs: contendrá el contrato de los servicios web desarrollados, si se tienen diferentes versiones, se recomienda tener diferentes archivos (uno por versión). El formato deberá estar en *yaml* y por convención, ser nombrado como *openapi[_vn]*
-- e2e: carpeta para colocar las pruebas e2e del proyecto
-- src/common: recursos comunes de nuestro proyecto_
-    - **config.js**: archivo de configuración del proyecto, encargado de leer las variables de entorno
-    - **utils.js**: funciones compartidas en la aplicación
-- src/middlewares/:
-	- **error.handler.jsx**: middlewares para gestión de errores, aquí incluimos la gestión de errores de ORM
-	- **notFound.handler.js**: middleware para la gestión de error 404
-	- **validator.handler**: middleware para la gestión de validaciones de esquema
-- src/routes: contiene las rutas de nuestro proyecto:
-    - index.js: archivo principal de ruteo, aquí se define la llamada a los demás routes
-    - example.router.js: cada recurso que manejemos deberá tener su propio router
-- src/schemas: contiene los esquemas definidos utilizando Joi, es decir, la definición de las entradas de nuestros servicios. Estas definiciones, deberán corresponder a las especificaciones del contrato (yaml) del servicio.
-    - example.schema.js: cada recurso que manejemos deberá tener definidos sus esquemas.
-- src/services: contiene los servicios asociados a los recursos de nuestra aplicación:
-    - example.service.js: se definen los servicios(métodos) que serán invocados por el router correspondiente. En este nivel, se hacen llamadas a la base de datos, servicios, entre otros.
-- src/app.js: archivo donde se encapsula la creación el servidor Express, aquí se proporciona el enlace con los *middlewares* y los *routes*
-- src/index.js: archivo donde se instancia *app* y se pone en escucha el servidor
-- .eslintrc.cjs: archivo de configuración de EsLint
-- vitest.config.js: archivo de configuración de vitest
+# Despliegue en contenedores
 
-## Main-ORM
-Esta rama del proyecto contiene el código base y un ejemplo para la implementación del ORM [Sequelize](https://sequelize.org/).
+Para desplegar la aplicación utilizando Docker, sigue estos pasos:
 
-Para la BD se utiliza MySQL corriendo en [Docker](https://www.docker.com/), por lo que tendrás que tener instalado Docker en tu máquina.
+## Preparación
+- Ingresar por terminal al worker de Docker
+- Crear el directorio donde se clonará el repositorio
+  ```console
+  sudo mkdir -p /opt/docker/compras-be && cd /opt/docker/compras-be
+  ```
+- Clonar el repositorio.
+  - *Development*
+  ```console
+  sudo git clone --branch develop http://auth:glpat-svH45ywyVqWE4kBg-85Y@192.168.29.74:8091/ingresos/pasarela-pagos/ingresos-extraordinarios/portal-compras-be.git .
+  ```
+  - *Production*
+  ```console
+  sudo git clone --branch main http://auth:glpat-svH45ywyVqWE4kBg-85Y@192.168.29.74:8091/ingresos/pasarela-pagos/ingresos-extraordinarios/portal-compras-be.git .
+  ```
+- Cambia la propiedad de archivos y directorios.
+  ```console
+  sudo chown -R $(whoami):$(whoami) /opt/docker/compras-be
+  ```
+- Crear el archivo **.env** con las variables de entorno proporcionadas en el vault de contraseñas [passbolt](https://pm.patronato.unam.mx/)
+- Firmarse en el registro de imagenes harbor
+  ```console
+  docker login harbor-utict.patronato.unam.mx
+  ```
+  En caso de error 'certificate signed by unknown authority`, seguir los pasos de [error-al-firmarse-en-el-registro-de-harbor](http://192.168.29.74:8091/estandares/lineamientos/desarrollo-web/wikipedia/-/wikis/stacks/harbor/index#error-al-firmarse-en-el-registro-de-harbor).'
+## Iniciar el contenedor
+- Crea y ejecuta los contenedores definidos.
+  ```console
+  docker compose up -d --build
+  ```
 
-### El directorio src/db
-Al utilizar una conexión a BD a través del ORM Sequelize, se adiciona el directorio *src/db*.
-- config/config.cjs: archivo de configuración para Sequelize-client que ayudará con las migraciones
-- connections: contiene el archivo con la conexión a la BD a través de Sequelize
-- migrations: puede contener múltiples archivos o uno solo, su objetivo es definir la creación de las tablas y estructura de la BD
-- models: contendrá los modelos que correspondan a cada tabla a utilizar (example.js) y el archivo index.js que se encargará de cargar los modelos para las migraciones
-- seeders: contendrá los archivos para la carga de datos iniciales de la BD (en este caso, datos de prueba). 
-
-### Setup de la BD
-De manera abreviada, puedes ejecutar el siguiente comando, para levantar el contenedor de la BD, ejecutar las migraciones y los seeders
-`npm run db:setup`
-
-En las siguientes secciones, se encuentran los pasos más a detalle para lograr el mismo resultado.
-
-### Levantar BD en docker
-1. Situarse en la raiz del proyecto y ejecutar:
-
-`docker-compose up -d mysql`
-
-2. Corroborar que la BD esta arriba
-
-`docker-compose ps`
-
-3. Bajar la BD
-
-`docker-compose down`
-
-4. Conectarse a la terminal del contenedor
-`docker-compose exec mysql bash`
-
-5. Ejecutar mysql desde línea de comandos
-`mysql -utestuser -p`
-
-6. Salir del contenedor
-`exit`
-
-### Migraciones (no aplica si la BD ya existe)
-1. Ejecutar el siguiente comando para la creación de las tablas
-`npm run migrations:run`
-
-### Seeders (no aplica si la BD ya existe)
-1. Para cargar los datos de prueba ejecutar:
-`npm run seeders:all`
-
-2. Para revertir la carga de datos de prueba ejecutar:
-`npm run seeders:undo`
-
-# Ejecución del proyecto en local
-El proyecto require un archivo de configuración de variables de ambiente, este deberá ser creado en la carpeta raíz del proyecto con el nombre **.env**, deberá contener las variables especificadas en el archivo **.env_example**.
-
-En la terminal, a nivel de la raíz del proyecto, ejecutar los siguientes comandos:
-
-- `npm install` para instalar dependencias
-
-- `npm run dev` para levantar el proyecto en local
-
-En la terminal observará la línea que indica la URL donde la aplicación esta disponible, por ejemplo:
-
-```bash
-Server ExpressJS is listening on port http://localhost:3000/
-```
+## Migraciones y seeders
+- Ejecuta las migraciones para crear y sembrar los modelos en la base de datos:
+  ```console
+  docker exec compras-be-api-1 npm run compras:db:up
+  ```
+## Acceso a la aplicación
+- La aplicación estará disponible en http://compras-be.localhost, donde localhost es el nombre del servidor o dirección IP. Obtendras un mensaje JSON similar al siguiente
+  ```json
+  {
+    "environment": "development",
+    "containerId": "fd42c5d844b2"
+  }
+  ```

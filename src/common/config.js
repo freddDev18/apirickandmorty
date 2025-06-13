@@ -1,15 +1,32 @@
-require('dotenv').config();
+const dotenv = require('dotenv');
+// Load the main .env file
+dotenv.config({ path: '.env' });
 
-const config = {
-    env: process.env.NODE_ENV || 'dev',
-    host: process.env.HOST || 'localhost',
-    port: process.env.PORT || 3000,
-    dbHost: process.env.DB_HOST,
-    dbName: process.env.DB_NAME,
-    dbUser: process.env.DB_USER,
-    dbPassword: process.env.DB_PASSWORD,
-    dbRootPassword: process.env.DB_ROOT_PASSWORD,
-    isProd: process.env.NODE_ENV === 'production',
+const env = process.env.NODE_ENV || 'development';
+
+dotenv.config({ path: '.env' });
+
+// Load environment-specific .env file if it exists
+const envFile = `.env.${env}`;
+
+dotenv.config({ path: envFile, override: true });
+
+const appConfig = {
+  env,
+  isProd: env === 'production',
+  host: process.env.HOST || 'localhost',
+  port: process.env.PORT || 3000,
 };
 
-module.exports = config;
+const usersConfig = {
+  dbHost: process.env.DB_HOST_APP,
+  dbPort: process.env.DB_PORT_APP || 3306,
+  dbName: process.env.DB_NAME_APP,
+  dbUser: process.env.DB_USER_APP,
+  dbPassword: process.env.DB_PASSWORD_APP,
+};
+
+module.exports = {
+  appConfig,
+  usersConfig,
+};

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    network_mode: service:db
+    depends_on:
+      - db
+  db:
+    image: mysql:lts
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+  db-e2e:
+    image: mysql:lts
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}_test
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "3307:3306"
+  
+    

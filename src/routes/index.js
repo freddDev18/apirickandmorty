@@ -1,14 +1,14 @@
 const { Router } = require('express');
 
-const exampleRouter = require('./user.router.js');
+const usersRouter = require('./users.router.js');
 
 function routerApi(app) {
-    const router = Router();
-    app.use('/api/v1', router);
-    const health = (req, res) => { res.sendStatus(200); };
+  const router = Router();
+  app.use('/api/v1', router);
+  const health = (req, res) => { res.sendStatus(200); };
 
-    router.get('/', health);
-    router.use('/example', exampleRouter);
+  router.get('/', health);
+  router.use('/users', usersRouter);
 }
 
 module.exports = routerApi;

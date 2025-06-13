@@ -12,7 +12,7 @@
       "import/extensions": [2, "always", { "ignorePackages": true }],
       "import/no-extraneous-dependencies": ["error", { "devDependencies": ["**/*.test.js", "**/*.e2e.js"] }],
       "max-len": ["error", { "code": 180, "ignoreUrls": true }],
-      "indent": ["error", 4]
+      "indent": ["error", 2]
     },
     "globals": {
       "vi": true,
