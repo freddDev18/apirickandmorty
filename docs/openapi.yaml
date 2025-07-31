@@ -63,7 +63,7 @@ paths:
       description: Devuelve un usuario por ID.
       operationId: findUserById
       parameters:
-          - $ref: '#/components/parameters/query'
+          - $ref: '#/components/parameters/query.parameter'
       responses:
         '200':
           $ref: '#/components/responses/Usuario.response'
@@ -79,7 +79,7 @@ paths:
       description: Devuelve un usuario por ID.
       operationId: getUserById
       parameters:
-        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           $ref: '#/components/responses/Usuario.response'
@@ -135,14 +135,14 @@ paths:
           $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
-    id:
+    id.parameter:
       name: id
       in: path
       description: ID del usuario
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
-    query:
+    query.parameter:
       name: id
       in: query
       description: ID del usuario
