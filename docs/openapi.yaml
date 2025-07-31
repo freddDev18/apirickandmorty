@@ -98,7 +98,7 @@ paths:
       description: Actualiza una porción o el total de los datos de un usuario existente
       operationId: updateUserById
       parameters:
-        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/id.parameter'
       requestBody:
         $ref: '#/components/requestBodies/ActualizarUsuario.requestBody'
       responses:
@@ -121,7 +121,7 @@ paths:
       description: Elimina un usuario identificado por un ID
       operationId: deleteUserById
       parameters:
-        - $ref: '#/components/parameters/id'
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           $ref: '#/components/responses/EliminarUsuario.response'
