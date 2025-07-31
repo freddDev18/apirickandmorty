@@ -20,7 +20,7 @@ servers:
         default: v1
 tags:
   - name: users
-    description: Todo sobre los usuarios fakers
+    description: Todo sobre usuarios fakers
 paths:
   /users:
     get:
@@ -31,13 +31,13 @@ paths:
       operationId: getUsers
       responses:
         '200':
-          $ref: '#/components/responses/UsuariosResponse'
+          $ref: '#/components/responses/Usuarios.response'
         '400':
-          $ref: '#/components/responses/BadRequest'  
+          $ref: '#/components/responses/BadRequest.response'
         '500':
-          $ref: '#/components/responses/ServerError'  
+          $ref: '#/components/responses/ServerError.response'
         default:
-          $ref: '#/components/responses/Default'
+          $ref: '#/components/responses/Default.response'
     post:
       tags:
         - users
@@ -45,16 +45,16 @@ paths:
       description: Agrega un nuevo usuario
       operationId: addUser
       requestBody:
-        $ref: '#/components/requestBodies/CrearUsuarioRequest'
+        $ref: '#/components/requestBodies/CrearUsuario.requestBody'
       responses:
         '201':
-          $ref: '#/components/responses/CrearUsuarioResponse'
+          $ref: '#/components/responses/CrearUsuario.response'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/BadRequest.response'
         '422':
-          $ref: '#/components/responses/UnprocessableContent'
+          $ref: '#/components/responses/UnprocessableContent.response'
         '500':
-          $ref: '#/components/responses/ServerError'
+          $ref: '#/components/responses/ServerError.response'
   /users/findById:
     get:
       tags:
@@ -66,11 +66,11 @@ paths:
           - $ref: '#/components/parameters/query'
       responses:
         '200':
-          $ref: '#/components/responses/UsuarioResponse'
+          $ref: '#/components/responses/Usuario.response'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound.response'
         default:
-          $ref: '#/components/responses/Default'
+          $ref: '#/components/responses/Default.response'
   /users/{id}:
     get:
       tags:
@@ -82,15 +82,15 @@ paths:
         - $ref: '#/components/parameters/id'
       responses:
         '200':
-          $ref: '#/components/responses/UsuarioResponse'
+          $ref: '#/components/responses/Usuario.response'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound.response'
         '400':
-          $ref: '#/components/responses/BadRequest' 
+          $ref: '#/components/responses/BadRequest.response'
         '500':
-          $ref: '#/components/responses/ServerError'   
+          $ref: '#/components/responses/ServerError.response'
         default:
-          $ref: '#/components/responses/Default'
+          $ref: '#/components/responses/Default.response'
     patch:
       tags:
         - users
@@ -100,20 +100,20 @@ paths:
       parameters:
         - $ref: '#/components/parameters/id'
       requestBody:
-        $ref: '#/components/requestBodies/ActualizarUsuarioRequest'
+        $ref: '#/components/requestBodies/ActualizarUsuario.requestBody'
       responses:
         '200':
-          $ref: '#/components/responses/ActualizarUsuarioResponse'
+          $ref: '#/components/responses/ActualizarUsuario.response'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          $ref: '#/components/responses/BadRequest.response'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound.response'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Conflict.response'
         '422':
-          $ref: '#/components/responses/UnprocessableContent'
+          $ref: '#/components/responses/UnprocessableContent.response'
         '500':
-          $ref: '#/components/responses/ServerError'
+          $ref: '#/components/responses/ServerError.response'
     delete:
       tags:
         - users
@@ -124,26 +124,28 @@ paths:
         - $ref: '#/components/parameters/id'
       responses:
         '200':
-          $ref: '#/components/responses/EliminarUsuarioResponse'
+          $ref: '#/components/responses/EliminarUsuario.response'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound.response'
         '409':
-          $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Conflict.response'
         '422':
-          $ref: '#/components/responses/UnprocessableContent'
+          $ref: '#/components/responses/UnprocessableContent.response'
         '500':
-          $ref: '#/components/responses/ServerError'
+          $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
     id:
       name: id
       in: path
+      description: ID del usuario
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
     query:
       name: id
       in: query
+      description: ID del usuario
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
@@ -193,7 +195,7 @@ components:
         - message
         - description
   requestBodies:
-    CrearUsuarioRequest:
+    CrearUsuario.requestBody:
       description: Datos para la creación de un usuario
       content:
         application/json:
@@ -217,7 +219,7 @@ components:
               - jobArea
               - email
       required: true
-    ActualizarUsuarioRequest:
+    ActualizarUsuario.requestBody:
       description: Request body para la actualización de una porción del usuario
       content:
         application/json:
@@ -232,13 +234,13 @@ components:
                   readOnly: true
       required: true
   responses:
-    UsuarioResponse:
+    Usuario.response:
       description: Usuario
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Usuario'
-    UsuariosResponse:
+    Usuarios.response:
       description: Lista de usuarios
       content:
         application/json:
@@ -249,19 +251,19 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/Usuario'
-    CrearUsuarioResponse:
+    CrearUsuario.response:
       description: Usuario creado
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Usuario'
-    ActualizarUsuarioResponse:
+    ActualizarUsuario.response:
       description: Usuario actualizado
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Usuario'
-    EliminarUsuarioResponse:
+    EliminarUsuario.response:
       description: Usuario eliminado
       content:
         application/json:
@@ -269,7 +271,7 @@ components:
             properties:
               id:
                 $ref: '#/components/schemas/uuid'
-    BadRequest:
+    BadRequest.response:
       description: La solicitud presenta una sintaxis de incorrecta
       content:
         application/json:
@@ -279,7 +281,7 @@ components:
             code: '400'
             message: 'Bad Request'
             description: 'Malformed request syntax'
-    NotFound:
+    NotFound.response:
       description: La solicitud no obtuvo resultados en el servidor
       content:
         application/json:
@@ -289,7 +291,7 @@ components:
             code: '404'
             message: 'Not found'
             description: 'Requested resource not found'
-    Conflict:
+    Conflict.response:
       description: La solicitud presenta conflictos en el estado del modelo
       content:
         application/json:
@@ -299,7 +301,7 @@ components:
             code: '409'
             message: 'Conflict'
             description: 'Trying to add a resource that already exists'
-    UnprocessableContent:
+    UnprocessableContent.response:
       description: La solicitud presenta conflictos con alguna regla de negocio
       content:
         application/json:
@@ -309,7 +311,7 @@ components:
             code: '422'
             message: 'Unprocessable Content'
             description: 'Business logic or Authorization errors'
-    ServerError:
+    ServerError.response:
       description: El servidor encontró una condición inesperada que le impidió cumplir con la solicitud
       content:
         application/json:
@@ -320,7 +322,7 @@ components:
             message: 'Internal Server Error'
             description: 'Server encountered an unexpected condition'
     # note! Response is used for all HTTP codes that are not covered individually
-    Default:
+    Default.response:
       description: Error inesperado
       content:
         application/json:
