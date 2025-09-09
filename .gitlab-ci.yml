@@ -42,7 +42,7 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "develop" 
     - if: $CI_MERGE_REQUEST_ID
 
-image: node:23
+image: node:${NODE_VERSION}
 stages:
   - install
   - test
