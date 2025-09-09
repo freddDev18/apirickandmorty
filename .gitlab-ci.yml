@@ -19,9 +19,16 @@ variables:
   # Deployment config
   SSH_USER: desarrollo
   SSH_HOST: spdocker-desa-24.patronato.unam.mx
-  SSH_PORT: 22
+  SSH_PORT: "22"
   SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
   REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}
+
+  # Database config (para tests)
+  DB_HOST_TEST: db-e2e
+  DB_PORT_TEST: "3306"
+  DB_NAME_TEST: mysqldb_test
+  DB_USER_TEST: admin
+  DB_PASSWORD_TEST: qwerty123
 
   # Node config
   NODE_VERSION: "23"
@@ -62,13 +69,7 @@ default:
     when:
       - runner_system_failure
       - stuck_or_timeout_failure
-  # tags:
-  #   - utict
-  # cache:
-  #   key: ${CI_COMMIT_REF_SLUG}
-  #   paths:
-  #     - node_modules/
-  #   policy: pull-push
+
 install-dependencies:
   stage: install
   image: node:${NODE_VERSION}-alpine
@@ -90,16 +91,6 @@ install-dependencies:
       - node_modules/
       - .npm/
     policy: pull-push
-# install-dependencies:
-#   stage: install
-#   script:
-#     - npm ci  # Usa npm ci en lugar de npm install para CI
-#   artifacts:
-#     expire_in: 1hr
-#     paths:
-#       - node_modules/
-  # Sin cache - usa el de default
-  # Sin rules - debe ejecutarse siempre
 
 lint:
   stage: test
@@ -111,25 +102,28 @@ lint:
 
 e2e-tests:
   stage: test
-  image: node:23
-  tags:
-    - utict
+  image: node:${NODE_VERSION}-alpine
   services:
     - name: mysql:8
-      alias: db-e2e
+      alias: ${DB_HOST_TEST}
+      command: ["--default-authentication-plugin=mysql_native_password"]
   variables:
     # Database configuration for e2e tests
-    MYSQL_DATABASE: mysqldb_test
-    MYSQL_USER: admin
-    MYSQL_PASSWORD: qwerty123
+    MYSQL_DATABASE: ${DB_NAME_TEST}
+    MYSQL_USER: ${DB_USER_TEST}
+    MYSQL_PASSWORD: ${DB_PASSWORD_TEST}
     MYSQL_ROOT_PASSWORD: root
     # Application environment variables
     NODE_ENV: e2e
-    DB_HOST_APP: db-e2e
-    DB_PORT_APP: 3306
-    DB_NAME_APP: mysqldb_test
-    DB_USER_APP: admin
-    DB_PASSWORD_APP: qwerty123
+    DB_HOST_APP: ${DB_HOST_TEST}
+    DB_PORT_APP: ${DB_PORT_TEST}
+    DB_NAME_APP: ${DB_NAME_TEST}
+    DB_USER_APP: ${DB_USER_TEST}
+    DB_PASSWORD_APP: ${DB_PASSWORD_TEST}
+  before_script:
+    # Esperar a que MySQL esté listo
+    - apk add --no-cache mysql-client
+    - until mysql -h${DB_HOST_TEST} -u${DB_USER_TEST} -p${DB_PASSWORD_TEST} -e "SELECT 1"; do sleep 5; done
   script:
     - npm run e2e:coverage
   dependencies:
@@ -153,6 +147,7 @@ e2e-tests:
         - "test/**/*"
         - "package*.json"
         - "*.yml"
+        - "Dockerfile"
 
 build-app:
   stage: build
