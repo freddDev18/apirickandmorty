@@ -82,8 +82,6 @@ install-dependencies:
     expire_in: 1 day
     paths:
       - node_modules/
-    reports:
-      dependency_scanning: gl-dependency-scanning-report.json
   cache:
     key: 
       files:
