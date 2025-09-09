@@ -142,6 +142,7 @@ e2e-tests:
         - "test/**/*"
         - "package*.json"
         - "*.yml"
+        - "Dockerfile"
 
 
 build-app:
