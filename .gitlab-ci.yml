@@ -27,9 +27,6 @@ variables:
   NODE_VERSION: "23"
   NPM_CONFIG_CACHE: .npm
 
-  # General config
-  ARTIFACTS_EXPIRE_TIME: 1 day
-  CACHE_EXPIRE_TIME: 1 hr
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -84,7 +81,7 @@ install-dependencies:
     - npm ci --only=production --no-audit
     - npm ci --only=development --no-audit
   artifacts:
-    expire_in: ${ARTIFACTS_EXPIRE_TIME}
+    expire_in: 1 day
     paths:
       - node_modules/
     reports:
