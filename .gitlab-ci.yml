@@ -28,8 +28,8 @@ variables:
   NPM_CONFIG_CACHE: .npm
 
   # General config
-  ARTIFACTS_EXPIRE_TIME: 1 week
-  CACHE_EXPIRE_TIME: 1 day
+  ARTIFACTS_EXPIRE_TIME: 1 day
+  CACHE_EXPIRE_TIME: 1 hr
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -74,15 +74,37 @@ default:
   #   paths:
   #     - node_modules/
   #   policy: pull-push
-
 install-dependencies:
   stage: install
+  image: node:${NODE_VERSION}-alpine
+  before_script:
+    - npm config set cache ${NPM_CONFIG_CACHE} --global
+    - npm config set prefer-offline true
   script:
-    - npm ci  # Usa npm ci en lugar de npm install para CI
+    - npm ci --only=production --no-audit
+    - npm ci --only=development --no-audit
   artifacts:
-    expire_in: 1hr
+    expire_in: ${ARTIFACTS_EXPIRE_TIME}
     paths:
       - node_modules/
+    reports:
+      dependency_scanning: gl-dependency-scanning-report.json
+  cache:
+    key: 
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+      - .npm/
+    policy: pull-push
+# install-dependencies:
+#   stage: install
+#   script:
+#     - npm ci  # Usa npm ci en lugar de npm install para CI
+#   artifacts:
+#     expire_in: 1hr
+#     paths:
+#       - node_modules/
   # Sin cache - usa el de default
   # Sin rules - debe ejecutarse siempre
 
