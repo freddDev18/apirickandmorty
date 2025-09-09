@@ -147,9 +147,9 @@ e2e-tests:
 
 build-app:
   stage: build
-  image: docker:latest
+  image: docker:24.0-dind
   services:
-    - docker:dind
+    - docker:24.0-dind
   before_script:
     - echo "Logging into Harbor registry..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
@@ -179,48 +179,34 @@ build-app:
     # NO en merge requests - solo en ramas principales
 
 deploy-qa:
+  <<: *deploy_template
   stage: deploy
-  image: alpine:latest
-  tags:
-    - utict
-  before_script:
-    - apk add --no-cache openssh-client sshpass rsync
-    # Verificar que ENV_FILE existe y crear .env
-    - echo "Checking ENV_FILE variable..."
-    - |
-      if [ -z "$ENV_FILE" ] || [ ! -f "$ENV_FILE" ]; then
-        echo "ERROR: ENV_FILE variable is not set or file doesn't exist"
-        echo "Please configure ENV_FILE as a File type variable in GitLab CI/CD settings"
-        exit 1
-      fi
-    - cp "$ENV_FILE" .env
-    - echo "✓ .env file created successfully"
   script:
-    # Crear el directorio remoto si no existe
+    - echo "Deploying to QA environment..."
     - echo "Creating remote directory structure..."
-    - sshpass -p "$SSH_PASSWORD" ssh -tt -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SSH_USER@$SSH_HOST "echo '$SSH_PASSWORD' | sudo -S mkdir -p $REMOTE_PATH && echo '$SSH_PASSWORD' | sudo -S chown $SSH_USER:$SSH_USER $REMOTE_PATH"
-    - sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SSH_USER@$SSH_HOST "ls -la $REMOTE_PATH"
-
-    # Copia archivos necesarios al servidor remoto
-    - echo "Copying files to remote server..."
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -tt -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST \
+        "echo '$SSH_PASSWORD' | sudo -S mkdir -p $REMOTE_PATH && \
+         echo '$SSH_PASSWORD' | sudo -S chown $SSH_USER:$SSH_USER $REMOTE_PATH"
+    
+    - echo "Copying deployment files..."
     - |
       sshpass -p "$SSH_PASSWORD" rsync -avz --timeout=60 \
-        -e "ssh -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+        -e "ssh -p $SSH_PORT $SSH_OPTIONS" \
         compose.yml .env $SSH_USER@$SSH_HOST:$REMOTE_PATH/
-
-    # Ejecuta comandos en el servidor remoto con las variables necesarias
-    - echo "Executing deployment commands..."
+    
+    - echo "Executing deployment..."
     - |
-      sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SSH_USER@$SSH_HOST "
+      sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
         cd $REMOTE_PATH &&
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
         export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export IMAGE_TAG='$IMAGE_TAG' &&
-        echo 'Using image: $HARBOR_REGISTRY/$HARBOR_PROJECT/$IMAGE_NAME:$IMAGE_TAG' &&
+        echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose pull &&
-        docker compose up -d&&
+        docker compose up -d --remove-orphans &&
         docker compose ps
       "
   dependencies:
@@ -230,55 +216,67 @@ deploy-qa:
       when: manual  # Deploy manual en develop
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual  # Deploy manual en main también
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual  # NO en merge requests
 
-cleanup_runner:
-  stage: deploy
-  image: docker:latest
+cleanup:docker:
+  <<: *cleanup_template
+  image: docker:24.0-dind
   services:
-    - docker:dind
-  tags:
-    - utict
+    - docker:24.0-dind
+  parallel:
+    matrix:
+      - TARGET: ["runner", "server"]
   script:
-    - echo "Cleaning up Docker images older than 7 days..."
-    # Limpiar imágenes no utilizadas
-    - docker image prune -a --filter "until=168h" --force
-    # Limpiar contenedores parados
-    - docker container prune --force
-    # Limpiar volúmenes huérfanos
-    - docker volume prune --force
-    # Mostrar espacio liberado
-    - docker system df
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual  # Deploy manual en develop
-  allow_failure: true
-
-cleanup_server:
-  stage: deploy
-  image: alpine:latest
-  tags:
-    - utict
-
-  before_script:
-    - apk add --no-cache openssh-client sshpass
-  script:
-    - echo "Cleaning up Docker images on deployment server..."
     - |
-      sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
-        echo 'Current Docker usage:' &&
-        docker system df &&
-        echo 'Cleaning old images...' &&
-        docker image prune -a --filter 'until=168h' --force &&
-        docker container prune --force &&
-        docker volume prune --force &&
-        echo 'Cleanup completed. New usage:' &&
+      if [ "$TARGET" == "runner" ]; then
+        echo "Cleaning up local Docker resources..."
+        docker image prune -a --filter "until=168h" --force
+        docker container prune --force
+        docker volume prune --force
         docker system df
-      "
+      else
+        echo "Cleaning up remote Docker resources..."
+        apk add --no-cache openssh-client sshpass
+        sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
+          docker image prune -a --filter 'until=168h' --force &&
+          docker container prune --force &&
+          docker volume prune --force &&
+          docker system df
+        "
+      fi
+
+.deploy_template: &deploy_template
+  image: alpine:3.18
+  before_script:
+    - apk add --no-cache openssh-client sshpass rsync curl
+    - |
+      if [ -z "$ENV_FILE" ] || [ ! -f "$ENV_FILE" ]; then
+        echo "ERROR: ENV_FILE variable is not set or file doesn't exist"
+        exit 1
+      fi
+    - cp "$ENV_FILE" .env
+    - echo "✓ .env file created successfully"
+  after_script:
+    # Health check después del deploy
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        echo "Performing health check..."
+        sleep 30
+        if ! curl -f http://${SSH_HOST}:8080/health; then
+          echo "Health check failed, consider rollback"
+          exit 1
+        fi
+      fi
+
+.cleanup_template: &cleanup_template
+  stage: deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
     - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual  # Deploy manual en develop
+      when: manual
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
   allow_failure: true
+
