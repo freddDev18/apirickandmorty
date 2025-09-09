@@ -106,7 +106,6 @@ e2e-tests:
   services:
     - name: mysql:8
       alias: ${DB_HOST_TEST}
-      command: ["--default-authentication-plugin=mysql_native_password"]
   variables:
     # Database configuration for e2e tests
     MYSQL_DATABASE: ${DB_NAME_TEST}
@@ -120,10 +119,6 @@ e2e-tests:
     DB_NAME_APP: ${DB_NAME_TEST}
     DB_USER_APP: ${DB_USER_TEST}
     DB_PASSWORD_APP: ${DB_PASSWORD_TEST}
-  before_script:
-    # Esperar a que MySQL esté listo
-    - apk add --no-cache mysql-client
-    - until mysql -h${DB_HOST_TEST} -u${DB_USER_TEST} -p${DB_PASSWORD_TEST} -e "SELECT 1"; do sleep 5; done
   script:
     - npm run e2e:coverage
   dependencies:
