@@ -25,8 +25,6 @@ variables:
 
   # Node config
   NODE_VERSION: "23"
-  NPM_CONFIG_CACHE: .npm
-
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -75,7 +73,7 @@ install-dependencies:
   stage: install
   image: node:${NODE_VERSION}-alpine
   before_script:
-    - npm config set cache ${NPM_CONFIG_CACHE} --global
+    - npm config set cache .npm --global
     - npm config set prefer-offline true
   script:
     - npm ci --only=production --no-audit
