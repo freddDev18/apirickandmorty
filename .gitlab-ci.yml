@@ -105,7 +105,7 @@ e2e-tests:
   image: node:${NODE_VERSION}-alpine
   services:
     - name: mysql:8
-      alias: db-e2e
+      alias: ${DB_HOST_TEST}
   variables:
     # Database configuration for e2e tests
     MYSQL_DATABASE: ${DB_NAME_TEST}
