@@ -102,7 +102,7 @@ lint:
 
 e2e-tests:
   stage: test
-  image: node:23
+  image: node:${NODE_VERSION}-alpine
   tags:
     - utict
   services:
