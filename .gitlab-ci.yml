@@ -144,7 +144,6 @@ e2e-tests:
         - "*.yml"
         - "Dockerfile"
 
-
 build-app:
   stage: build
   image: docker:24.0-dind
@@ -175,7 +174,6 @@ build-app:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "develop"
-    - if: $CI_MERGE_REQUEST_ID
     # NO en merge requests - solo en ramas principales
 
 .deploy_template: &deploy_template
