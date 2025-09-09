@@ -102,10 +102,12 @@ lint:
 
 e2e-tests:
   stage: test
-  image: node:${NODE_VERSION}-alpine
+  image: node:23
+  tags:
+    - utict
   services:
     - name: mysql:8
-      alias: ${DB_HOST_TEST}
+      alias: db-e2e
   variables:
     # Database configuration for e2e tests
     MYSQL_DATABASE: mysqldb_test
@@ -142,7 +144,7 @@ e2e-tests:
         - "test/**/*"
         - "package*.json"
         - "*.yml"
-        - "Dockerfile"
+
 
 build-app:
   stage: build
