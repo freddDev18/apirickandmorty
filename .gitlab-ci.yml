@@ -3,6 +3,33 @@
 #   - template: Security/SAST.gitlab-ci.yml
 #   - template: Security/Container-Scanning.gitlab-ci.yml
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
+variables:
+  # Docker config
+  DOCKER_HOST: unix:///var/run/docker.sock
+  DOCKER_TLS_CERTDIR: ""
+  
+  # Registry config
+  HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
+  HARBOR_PROJECT: backend-app
+  HARBOR_USERNAME: desarrollo
+  IMAGE_NAME: api
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}
+  
+  # Deployment config
+  SSH_USER: desarrollo
+  SSH_HOST: spdocker-desa-24.patronato.unam.mx
+  SSH_PORT: 22
+  SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}
+
+  # Node config
+  NODE_VERSION: "23"
+  NPM_CONFIG_CACHE: .npm
+
+  # General config
+  ARTIFACTS_EXPIRE_TIME: 1 week
+  CACHE_EXPIRE_TIME: 1 day
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -23,12 +50,30 @@ stages:
 # Agregar caché global y políticas
 default:
   tags:
-    - utict # Usa la etiqueta de tu runner on-premise si aplica
+    - utict
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/
-    policy: pull-push
+    - key: 
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/
+      policy: pull-push
+    - key: npm-cache
+      paths:
+        - .npm/
+      policy: pull-push
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+  # tags:
+  #   - utict
+  # cache:
+  #   key: ${CI_COMMIT_REF_SLUG}
+  #   paths:
+  #     - node_modules/
+  #   policy: pull-push
 
 install-dependencies:
   stage: install
@@ -101,15 +146,6 @@ build-app:
     - utict
   services:
     - docker:dind
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-    DOCKER_TLS_CERTDIR: ""
-
-    # Ajusta la URL, proyecto y nombre de imagen según tu configuración de Harbor
-    HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
-    HARBOR_PROJECT: backend-app
-    IMAGE_NAME: api
-    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   before_script:
     - echo "Attempting login to $HARBOR_REGISTRY..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
@@ -137,14 +173,6 @@ deploy-qa:
   image: alpine:latest
   tags:
     - utict
-  variables:
-    SSH_HOST: spdocker-desa-24.patronato.unam.mx
-    SSH_PORT: 22
-    REMOTE_PATH: /opt/docker/$HARBOR_PROJECT
-    HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
-    HARBOR_PROJECT: backend-app
-    IMAGE_NAME: api
-    IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   before_script:
     - apk add --no-cache openssh-client sshpass rsync
     # Verificar que ENV_FILE existe y crear .env
@@ -200,9 +228,6 @@ cleanup_runner:
     - docker:dind
   tags:
     - utict
-  variables:
-    DOCKER_HOST: unix:///var/run/docker.sock
-    DOCKER_TLS_CERTDIR: ""
   script:
     - echo "Cleaning up Docker images older than 7 days..."
     # Limpiar imágenes no utilizadas
@@ -225,9 +250,7 @@ cleanup_server:
   image: alpine:latest
   tags:
     - utict
-  variables:
-    SSH_HOST: spdocker-desa-24.patronato.unam.mx
-    SSH_PORT: 22
+
   before_script:
     - apk add --no-cache openssh-client sshpass
   script:
