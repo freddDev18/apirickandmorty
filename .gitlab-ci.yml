@@ -178,6 +178,29 @@ build-app:
     - if: $CI_MERGE_REQUEST_ID
     # NO en merge requests - solo en ramas principales
 
+.deploy_template: &deploy_template
+  image: alpine:3.18
+  before_script:
+    - apk add --no-cache openssh-client sshpass rsync curl
+    - |
+      if [ -z "$ENV_FILE" ] || [ ! -f "$ENV_FILE" ]; then
+        echo "ERROR: ENV_FILE variable is not set or file doesn't exist"
+        exit 1
+      fi
+    - cp "$ENV_FILE" .env
+    - echo "✓ .env file created successfully"
+  after_script:
+    # Health check después del deploy
+    - |
+      if [ "$CI_JOB_STATUS" == "success" ]; then
+        echo "Performing health check..."
+        sleep 30
+        if ! curl -f http://${SSH_HOST}:8080/health; then
+          echo "Health check failed, consider rollback"
+          exit 1
+        fi
+      fi
+
 deploy-qa:
   <<: *deploy_template
   stage: deploy
@@ -219,6 +242,17 @@ deploy-qa:
     - if: $CI_MERGE_REQUEST_ID
       when: manual  # NO en merge requests
 
+.cleanup_template: &cleanup_template
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
+  allow_failure: true
+
 cleanup:docker:
   <<: *cleanup_template
   image: docker:24.0-dind
@@ -245,38 +279,3 @@ cleanup:docker:
           docker system df
         "
       fi
-
-.deploy_template: &deploy_template
-  image: alpine:3.18
-  before_script:
-    - apk add --no-cache openssh-client sshpass rsync curl
-    - |
-      if [ -z "$ENV_FILE" ] || [ ! -f "$ENV_FILE" ]; then
-        echo "ERROR: ENV_FILE variable is not set or file doesn't exist"
-        exit 1
-      fi
-    - cp "$ENV_FILE" .env
-    - echo "✓ .env file created successfully"
-  after_script:
-    # Health check después del deploy
-    - |
-      if [ "$CI_JOB_STATUS" == "success" ]; then
-        echo "Performing health check..."
-        sleep 30
-        if ! curl -f http://${SSH_HOST}:8080/health; then
-          echo "Health check failed, consider rollback"
-          exit 1
-        fi
-      fi
-
-.cleanup_template: &cleanup_template
-  stage: deploy
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual
-    - if: $CI_MERGE_REQUEST_ID
-      when: manual
-  allow_failure: true
-
