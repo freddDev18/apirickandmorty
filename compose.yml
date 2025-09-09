@@ -1,26 +1,44 @@
 services:
   api:
-    image: harbor-utict.patronato.unam.mx/myproject/api:1.0.0
+    image: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}:latest
     pull_policy: always
     # Solo descomentar si se quiere construir la imagen localmente
     # build:
     #   context: .
     #   dockerfile: Dockerfile
+    command: sh -c 'until nc -z db 3306; do echo "Waiting for MySQL..."; sleep 2; done && npm run db:reset && pm2-runtime start ecosystem.config.js'
     labels:
-      - "traefik.http.routers.my-api-http.rule=Host(.my-api.${HOST}`)||Host(.my-api.${HOST}.patronato.unam.mx`)"
-      - "traefik.http.routers.my-api-http.entrypoints=web"
+      - "traefik.http.routers.user-http.rule=Host(`user.${HOST}`)||Host(`user.${HOST}.patronato.unam.mx`)"
+      - "traefik.http.routers.user-http.entrypoints=web"
     env_file:
       - .env
     volumes:
       - app_logs:/opt/app/logs
-    restart: always
+    restart: on-failure:3
     networks:
       - proxy-net
     environment:
       - TZ=America/Mexico_City
+    depends_on:
+    - db
+  db:
+    image: mysql:8
+    restart: on-failure:5
+    environment:
+      - MYSQL_DATABASE=mysqldb
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=qwerty
+      - MYSQL_ROOT_PASSWORD=qwerty
+      - TZ=America/Mexico_City
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - proxy-net
 volumes:
   app_logs:
-    name: api-logs
+    name: user-api-logs
+  db_data:
+    name: mysql-data
 networks:
   proxy-net:
     external: true

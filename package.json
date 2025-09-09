@@ -8,7 +8,7 @@
         "coverage": "vitest run --coverage",
         "start": "node src/index.js",
         "lint": "eslint .",
-        "prepare": "husky",
+        "prepare": "husky || true",
         "e2e": "NODE_ENV=e2e vitest --exclude '**/*.test.js' --watch=false",
         "e2e:coverage": "NODE_ENV=e2e vitest run --coverage --exclude '**/*.test.js' --watch=false",
         "migrations:generate": "sequelize-cli migration:generate --name",
@@ -27,7 +27,6 @@
     "devDependencies": {
         "@commitlint/cli": "^19.3.0",
         "@commitlint/config-conventional": "^19.2.2",
-        "@faker-js/faker": "^8.4.1",
         "@vitest/coverage-v8": "^1.4.0",
         "async_hooks": "^1.0.0",
         "eslint": "^8.57.0",
@@ -41,7 +40,6 @@
         "msw": "^2.7.3",
         "nodemon": "^3.0.2",
         "prettier": "3.2.5",
-        "sequelize-cli": "^6.6.2",
         "supertest": "^7.0.0",
         "vitest": "^1.4.0"
     },
@@ -55,6 +53,8 @@
         "mysql2": "^3.9.7",
         "pg": "^8.12.0",
         "sequelize": "^6.37.3",
-        "umzug": "^3.8.2"
+        "umzug": "^3.8.2",
+        "@faker-js/faker": "^8.4.1",
+        "sequelize-cli": "^6.6.2"
     }
 }
