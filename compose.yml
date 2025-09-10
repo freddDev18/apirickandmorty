@@ -8,8 +8,8 @@ services:
     #   dockerfile: Dockerfile
     command: sh -c 'until nc -z db 3306; do echo "Waiting for MySQL..."; sleep 2; done && npm run db:reset && pm2-runtime start ecosystem.config.js'
     labels:
-      - "traefik.http.routers.user-http.rule=Host(`user-be.${HOST}`)||Host(`user-be.${HOST}.patronato.unam.mx`)"
-      - "traefik.http.routers.user-http.entrypoints=web"
+      - "traefik.http.routers.user-be-http.rule=Host(`user-be.${HOST}`)||Host(`user-be.${HOST}.patronato.unam.mx`)"
+      - "traefik.http.routers.user-be-http.entrypoints=web"
     env_file:
       - .env
     volumes:
