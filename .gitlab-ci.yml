@@ -10,7 +10,7 @@ variables:
   
   # Registry config
   HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
-  HARBOR_PROJECT: backend-app
+  HARBOR_PROJECT: ${CI_PROJECT_NAME}-be
   HARBOR_USERNAME: desarrollo
   IMAGE_NAME: api
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA

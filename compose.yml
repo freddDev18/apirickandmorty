@@ -8,8 +8,8 @@ services:
     #   dockerfile: Dockerfile
     command: sh -c 'until nc -z db 3306; do echo "Waiting for MySQL..."; sleep 2; done && npm run db:reset && pm2-runtime start ecosystem.config.js'
     labels:
-      - "traefik.http.routers.user-be-http.rule=Host(`user-be.${HOST}`)||Host(`user-be.${HOST}.patronato.unam.mx`)"
-      - "traefik.http.routers.user-be-http.entrypoints=web"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-be-http.rule=Host(`${CI_PROJECT_NAME}-be.${HOST}`)||Host(`${CI_PROJECT_NAME}-be.${HOST}.patronato.unam.mx`)"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-be-http.entrypoints=web"
     env_file:
       - .env
     volumes:
@@ -36,9 +36,9 @@ services:
       - proxy-net
 volumes:
   app_logs:
-    name: user-api-logs
+    name: ${CI_PROJECT_NAME}-api-logs
   db_data:
-    name: mysql-data
+    name: ${CI_PROJECT_NAME}-mysql-data
 networks:
   proxy-net:
     external: true
