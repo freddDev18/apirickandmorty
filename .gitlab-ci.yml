@@ -193,6 +193,7 @@ deploy-qa:
   environment:
     name: qa
     url: http://${HARBOR_PROJECT}.${SSH_HOST}
+    on_stop: stop_qa
   script:
     - echo "Deploying to QA environment..."
     - echo "Creating remote directory structure..."
@@ -263,3 +264,21 @@ cleanup:docker:
           docker system df
         "
       fi
+
+stop_qa:
+  stage: deploy
+  environment:
+    name: qa
+    action: stop
+  script:
+    - apk add --no-cache openssh-client sshpass
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
+        cd $REMOTE_PATH &&
+        docker compose down
+      "
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
