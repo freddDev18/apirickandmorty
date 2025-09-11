@@ -12,7 +12,7 @@ variables:
   HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
   HARBOR_PROJECT: ${CI_PROJECT_NAME}
   HARBOR_USERNAME: desarrollo
-  IMAGE_NAME: api
+  IMAGE_NAME: fe
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}
   
@@ -21,7 +21,7 @@ variables:
   SSH_HOST: spdocker-desa-24.patronato.unam.mx
   SSH_PORT: "22"
   SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-be
+  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-${IMAGE_NAME}
 
   # Database config (para tests)
   DB_HOST_TEST: db-e2e
