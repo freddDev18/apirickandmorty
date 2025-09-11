@@ -21,7 +21,7 @@ variables:
   SSH_HOST: spdocker-desa-24.patronato.unam.mx
   SSH_PORT: "22"
   SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}
+  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-be
 
   # Database config (para tests)
   DB_HOST_TEST: db-e2e
