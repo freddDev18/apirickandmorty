@@ -36,7 +36,7 @@ services:
       - proxy-net
 volumes:
   app_logs:
-    name: ${CI_PROJECT_NAME}-api-logs
+    name: ${CI_PROJECT_NAME}-api-rest-logs
   db_data:
     name: ${CI_PROJECT_NAME}-mysql-data
 networks:
