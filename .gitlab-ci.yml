@@ -190,6 +190,9 @@ build-app:
 deploy-qa:
   <<: *deploy_template
   stage: deploy
+  environment:
+    name: qa
+    url: http://${HARBOR_PROJECT}.${SSH_HOST}
   script:
     - echo "Deploying to QA environment..."
     - echo "Creating remote directory structure..."
