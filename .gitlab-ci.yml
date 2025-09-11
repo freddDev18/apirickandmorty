@@ -275,6 +275,10 @@ stop_qa:
     - |
       sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
         cd $REMOTE_PATH &&
+        export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
+        export HARBOR_PROJECT='$HARBOR_PROJECT' &&
+        export IMAGE_NAME='$IMAGE_NAME' &&
+        export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         docker compose down
       "
   rules:
