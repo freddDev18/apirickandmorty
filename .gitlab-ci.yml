@@ -149,6 +149,30 @@ build-app:
   image: docker:24.0
   before_script:
     - apk add --no-cache curl
+    - echo "Checking if Harbor project exists or creating it..."
+    - |
+      # Check if project exists
+      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
+      
+      # If project doesn't exist, create it
+      if [ "$PROJECT_EXISTS" -eq "0" ]; then
+        echo "Creating Harbor project '$HARBOR_PROJECT'..."
+        curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" \
+          -H "Content-Type: application/json" \
+          -d "{\"project_name\": \"$HARBOR_PROJECT\", \"public\": false}" \
+          -o /dev/null
+        
+        # Check if project was created successfully
+        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
+        if [ "$PROJECT_CREATED" -eq "0" ]; then
+          echo "Failed to create Harbor project '$HARBOR_PROJECT'"
+          exit 1
+        else
+          echo "✓ Harbor project '$HARBOR_PROJECT' created successfully"
+        fi
+      else
+        echo "✓ Harbor project '$HARBOR_PROJECT' already exists"
+      fi
     - echo "Logging into Harbor registry..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
   script:
