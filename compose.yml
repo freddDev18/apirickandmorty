@@ -1,6 +1,6 @@
 services:
   api:
-    image: ${HARBOR_REGISTRY}/${IMAGE_NAME}:latest
+    image: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}:latest
     pull_policy: always
     # Solo descomentar si se quiere construir la imagen localmente
     # build:

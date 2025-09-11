@@ -12,16 +12,16 @@ variables:
   HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
   HARBOR_PROJECT: ${CI_PROJECT_NAME}
   HARBOR_USERNAME: desarrollo
-  IMAGE_NAME: ${CI_PROJECT_NAME}-api
+  IMAGE_NAME: api-rest
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
-  FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${IMAGE_NAME}
+  FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}
   
   # Deployment config
   SSH_USER: desarrollo
   SSH_HOST: spdocker-desa-24.patronato.unam.mx
   SSH_PORT: "22"
   SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  REMOTE_PATH: /opt/docker/${CI_PROJECT_NAME}
+  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}
 
   # Database config (para tests)
   DB_HOST_TEST: db-e2e
@@ -150,30 +150,30 @@ build-app:
   before_script:
     - apk add --no-cache curl
     - echo "Checking if Harbor project exists or creating it..."
-    # - |
-    #   # Check if project exists
-    #   PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
+    - |
+      # Check if project exists
+      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
       
-    #   # If project doesn't exist, create it
-    #   if [ "$PROJECT_EXISTS" -eq "0" ]; then
-    #     echo "Creating Harbor project '$HARBOR_PROJECT'..."
-    #     curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" \
-    #       -H "Content-Type: application/json" \
-    #       -d "{\"project_name\": \"$HARBOR_PROJECT\", \"public\": false}" \
-    #       -o /dev/null
+      # If project doesn't exist, create it
+      if [ "$PROJECT_EXISTS" -eq "0" ]; then
+        echo "Creating Harbor project '$HARBOR_PROJECT'..."
+        curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" \
+          -H "Content-Type: application/json" \
+          -d "{\"project_name\": \"$HARBOR_PROJECT\", \"public\": false}" \
+          -o /dev/null
         
-    #     # Check if project was created successfully
-    #     PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
-    #     if [ "$PROJECT_CREATED" -eq "0" ]; then
-    #       echo "Failed to create Harbor project '$HARBOR_PROJECT'"
-    #       exit 1
-    #     else
-    #       echo "✓ Harbor project '$HARBOR_PROJECT' created successfully"
-    #     fi
-    #   else
-    #     echo "✓ Harbor project '$HARBOR_PROJECT' already exists"
-    #   fi
-    # - echo "Logging into Harbor registry..."
+        # Check if project was created successfully
+        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
+        if [ "$PROJECT_CREATED" -eq "0" ]; then
+          echo "Failed to create Harbor project '$HARBOR_PROJECT'"
+          exit 1
+        else
+          echo "✓ Harbor project '$HARBOR_PROJECT' created successfully"
+        fi
+      else
+        echo "✓ Harbor project '$HARBOR_PROJECT' already exists"
+      fi
+    - echo "Logging into Harbor registry..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
   script:
     - echo "Building image ${FULL_IMAGE_NAME}:${IMAGE_TAG}"
@@ -216,7 +216,7 @@ deploy-qa:
   stage: deploy
   environment:
     name: qa
-    url: http://${CI_PROJECT_NAME}.${SSH_HOST}
+    url: http://${HARBOR_PROJECT}.${SSH_HOST}
     on_stop: stop_qa
   script:
     - echo "Deploying to QA environment..."
@@ -237,6 +237,7 @@ deploy-qa:
       sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
         cd $REMOTE_PATH &&
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
+        export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export IMAGE_TAG='$IMAGE_TAG' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
@@ -299,6 +300,7 @@ stop_qa:
       sshpass -p "$SSH_PASSWORD" ssh -p $SSH_PORT $SSH_OPTIONS $SSH_USER@$SSH_HOST "
         cd $REMOTE_PATH &&
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
+        export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         docker compose down
