@@ -10,7 +10,7 @@ variables:
   
   # Registry config
   HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
-  HARBOR_PROJECT: ${CI_PROJECT_NAME}-be
+  HARBOR_PROJECT: ${CI_PROJECT_NAME}
   HARBOR_USERNAME: desarrollo
   IMAGE_NAME: api
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
@@ -153,21 +153,6 @@ build-app:
     - apk add --no-cache curl
     - echo "Logging into Harbor registry..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
-    - |
-      echo "Ensuring Harbor project '$HARBOR_PROJECT' exists..."
-      STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" "https://$HARBOR_REGISTRY/api/v2.0/projects?project_name=$HARBOR_PROJECT")
-      if [ "$STATUS" = "200" ]; then
-        echo "✓ Harbor project '$HARBOR_PROJECT' already exists"
-      else
-        echo "Creating Harbor project '$HARBOR_PROJECT'..."
-        CREATE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" -H "Content-Type: application/json" -d "{\"project_name\":\"$HARBOR_PROJECT\",\"metadata\":{\"public\":\"false\"}}")
-        if [ "$CREATE_STATUS" = "201" ]; then
-          echo "✓ Harbor project '$HARBOR_PROJECT' created"
-        else
-          echo "ERROR: Failed to create Harbor project '$HARBOR_PROJECT' (HTTP $CREATE_STATUS)"
-          exit 1
-        fi
-      fi
   script:
     - echo "Building image ${FULL_IMAGE_NAME}:${IMAGE_TAG}"
     - |
