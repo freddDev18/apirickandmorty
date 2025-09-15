@@ -147,12 +147,12 @@ build-app:
   stage: build
   image: docker:24.0
   before_script:
-    - apk add --no-cache curl
+    - apk add --no-cache curl jq
     - echo "Checking if Harbor project exists or creating it..."
     - |
       # Check if project exists
-      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
-      
+      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | jq -e ".[] | select(.name == \"$HARBOR_PROJECT\")" > /dev/null && echo 1 || echo 0)
+
       # If project doesn't exist, create it
       if [ "$PROJECT_EXISTS" -eq "0" ]; then
         echo "Creating Harbor project '$HARBOR_PROJECT'..."
@@ -162,7 +162,7 @@ build-app:
           -o /dev/null
         
         # Check if project was created successfully
-        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | grep -c "name.*$HARBOR_PROJECT" || true)
+        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_PROJECT" | jq -e ".[] | select(.name == \"$HARBOR_PROJECT\")" > /dev/null && echo 1 || echo 0)
         if [ "$PROJECT_CREATED" -eq "0" ]; then
           echo "Failed to create Harbor project '$HARBOR_PROJECT'"
           exit 1
