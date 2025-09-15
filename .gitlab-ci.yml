@@ -256,7 +256,7 @@ deploy-qa:
       when: manual  # Deploy manual en main también
 
 .cleanup_template: &cleanup_template
-  stage: install
+  stage: deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
