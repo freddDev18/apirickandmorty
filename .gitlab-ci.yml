@@ -77,8 +77,7 @@ install-dependencies:
     - npm config set cache .npm --global
     - npm config set prefer-offline true
   script:
-    - npm ci --only=production --no-audit
-    - npm ci --only=development --no-audit
+     - npm ci --no-audit
   artifacts:
     expire_in: 1 day
     paths:
