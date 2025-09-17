@@ -1,6 +1,16 @@
+- [Despliegue](#despliegue)
+  - [Localhost](#localhost)
+  - [Desarrollo con Dev Containers](#desarrollo-con-dev-containers)
+  - [Producción](#producción)
+    - [Preparación](#preparación)
+    - [Iniciar el contenedor](#iniciar-el-contenedor)
+    - [Acceso a la aplicación](#acceso-a-la-aplicación)
+
+
 El proyecto usa el framework **ExpressJS** para Node.js, un entorno de ejecución de JavaScript de código abierto bajo licencia MIT. ExpressJS es útil para el desarrollo de APIs y proporciona una serie de características robustas para aplicaciones web y móviles.
 
-# Ejecución local  
+# Despliegue
+## Localhost  
 - **Preparación**
   - Crear el archivo **.env** en la raíz del proyecto, utilice el archivo **.env.example** para crear las variables y asignarles el valor requerido.
   - Instalar extensión [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) para Visual Studio Code
@@ -19,7 +29,7 @@ El proyecto usa el framework **ExpressJS** para Node.js, un entorno de ejecució
   - Abrir el archivo **api.http** localizado en la raíz del proyecto, utilizado para probar los endpoints de la API con la extensión `REST Client`
   - Oprimir el enlace **Send Request** del endpoint que se desea probar.
 
-# Ejecución en devcontainer
+## Desarrollo con Dev Containers
 Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Docker, proporcionando un entorno de desarrollo consistente y aislado. Para construir y ejecutar tu aplicación localmente utilizando Dev Containers, sigue estos pasos:
 
 - **Instalar extensiones necesarias**:
@@ -35,48 +45,64 @@ Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Doc
      - La aplicación estará disponible en http://localhost:3000
 
 
-# Despliegue en contenedores
+## Producción
 
-Para desplegar la aplicación utilizando Docker, sigue estos pasos:
+Para desplegar la aplicación en producción utilizando Docker, sigue estos pasos:
 
-## Preparación
-- Ingresar por terminal al worker de Docker
-- Crear el directorio donde se clonará el repositorio
+### Preparación
+- Ingresar por terminal al servidor Docker Standalone
+- Ejecutar los siguientes comandos:
   ```console
-  sudo mkdir -p /opt/docker/compras-be && cd /opt/docker/compras-be
+  # ----------------------------------
+  # ToDo: Cambiar valores de las variables según el proyecto
+  # ----------------------------------
+  export HARBOR_PROJECT=user
+  export PROJECT_ID=259
+
+  # Variables de entorno para el contenedor
+  export HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
+  export IMAGE_NAME=be
+  export CI_PROJECT_NAME=${HARBOR_PROJECT}
+  export DOCKER_PATH="/opt/docker/${CI_PROJECT_NAME}"
+  export PAT=glpat-svH45ywyVqWE4kBg-85Y
+  
+  # Verificar configuración
+  echo "Directorio de trabajo: $(pwd)"
+  echo "Variables configuradas:"
+  echo "  HARBOR_REGISTRY: ${HARBOR_REGISTRY}"
+  echo "  HARBOR_PROJECT: ${HARBOR_PROJECT}"
+  echo "  IMAGE_NAME: ${IMAGE_NAME}"
+  echo "  DOCKER_PATH: ${DOCKER_PATH}"
+
+  # Crear directorio y configurar permisos
+  sudo mkdir -p "${DOCKER_PATH}"
+  sudo chown -R $(whoami):$(whoami) "${DOCKER_PATH}"
+  cd "${DOCKER_PATH}"
+  touch .env
   ```
-- Clonar el repositorio.
-  - *Development*
+
+- Copiar el archivo **compose.yml** desde el repositorio remoto.
   ```console
-  sudo git clone --branch develop http://auth:glpat-svH45ywyVqWE4kBg-85Y@192.168.29.74:8091/ingresos/pasarela-pagos/ingresos-extraordinarios/portal-compras-be.git .
+  curl -o compose.yml "http://192.168.29.74:8091/api/v4/projects/${PROJECT_ID}/repository/files/compose.yml/raw?ref=main" --header "PRIVATE-TOKEN: ${PAT}"
   ```
-  - *Production*
-  ```console
-  sudo git clone --branch main http://auth:glpat-svH45ywyVqWE4kBg-85Y@192.168.29.74:8091/ingresos/pasarela-pagos/ingresos-extraordinarios/portal-compras-be.git .
-  ```
-- Cambia la propiedad de archivos y directorios.
-  ```console
-  sudo chown -R $(whoami):$(whoami) /opt/docker/compras-be
-  ```
-- Crear el archivo **.env** con las variables de entorno proporcionadas en el vault de contraseñas [passbolt](https://pm.patronato.unam.mx/)
-- Firmarse en el registro de imagenes harbor
-  ```console
-  docker login harbor-utict.patronato.unam.mx
-  ```
-  En caso de error 'certificate signed by unknown authority`, seguir los pasos de [error-al-firmarse-en-el-registro-de-harbor](http://192.168.29.74:8091/estandares/lineamientos/desarrollo-web/wikipedia/-/wikis/stacks/harbor/index#error-al-firmarse-en-el-registro-de-harbor).'
-## Iniciar el contenedor
+
+- Modificar el archivo **.env** con las variables de entorno proporcionadas en el vault de contraseñas [passbolt](https://pm.patronato.unam.mx/)
+
+### Iniciar el contenedor
 - Crea y ejecuta los contenedores definidos.
   ```console
   docker compose up -d --build
   ```
 
+<!-- 
 ## Migraciones y seeders
 - Ejecuta las migraciones para crear y sembrar los modelos en la base de datos:
   ```console
   docker exec compras-be-api-1 npm run compras:db:up
-  ```
-## Acceso a la aplicación
-- La aplicación estará disponible en http://compras-be.localhost, donde localhost es el nombre del servidor o dirección IP. Obtendras un mensaje JSON similar al siguiente
+  ``` 
+-->
+### Acceso a la aplicación
+- La aplicación estará disponible en http://user-be.localhost, donde `localhost` es el nombre del servidor o dirección IP. Obtendras un mensaje JSON similar al siguiente
   ```json
   {
     "environment": "development",
