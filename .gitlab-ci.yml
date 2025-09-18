@@ -295,7 +295,7 @@ cleanup:docker:
       fi
 
 stop_qa:
-  stage: deploy
+  stage: post-deploy
   environment:
     name: qa
     action: stop
