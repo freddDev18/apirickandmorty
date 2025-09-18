@@ -299,6 +299,9 @@ stop_qa:
   environment:
     name: qa
     action: stop
+  needs:
+    - job: deploy-qa
+      artifacts: false
   script:
     - apk add --no-cache openssh-client sshpass
     - |
@@ -378,6 +381,9 @@ stop_production:
   environment:
     name: production
     action: stop
+  needs:
+    - job: deploy-qa
+      artifacts: false
   script:
     - apk add --no-cache openssh-client sshpass
     - |

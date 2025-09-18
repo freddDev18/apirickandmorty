@@ -89,20 +89,13 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
   docker compose up -d --build
   ```
 
-   <!-- 
-   ## Migraciones y seeders
+<!-- 
+5. Migraciones y seeders
    - Ejecuta las migraciones para crear y sembrar los modelos en la base de datos:
      ```console
      docker exec compras-be-api-1 npm run compras:db:up
      ``` 
-   -->
-5. La aplicación estará disponible en http://user-be.localhost, donde `localhost` es el nombre del servidor o dirección IP y obtendras un mensaje JSON similar al siguiente
-  ```json
-  {
-    "environment": "development",
-    "containerId": "fd42c5d844b2"
-  }
-  ```
+-->
 
 ## Producción Continuos Delivery (CD)
 El proyecto está configurado para un despliegue continuo (CD) utilizando GitLab CI/CD. A continuación, se describen los pasos para configurar y utilizar esta funcionalidad:
