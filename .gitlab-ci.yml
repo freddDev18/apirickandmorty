@@ -348,13 +348,13 @@ stop_qa:
         exit 1
       fi
       
-      if [ -z "$SSH_PASSWORD_PROD" ]; then
-        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
+      if [ -z "$SSH_USER_PROD" ]; then
+        echo "ERROR: SSH_USER_PROD variable is not set"
         exit 1
       fi
       
-      if [ -z "$SSH_USER_PROD" ]; then
-        echo "ERROR: SSH_USER_PROD variable is not set"
+      if [ -z "$SSH_PASSWORD_PROD" ]; then
+        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
         exit 1
       fi
     - cp "$ENV_FILE_PROD" .env
