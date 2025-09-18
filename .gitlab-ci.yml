@@ -54,6 +54,7 @@ stages:
   - test
   - build
   - deploy
+  - post-deploy
   - delivery
 
 # Agregar caché global y políticas
@@ -260,7 +261,7 @@ deploy-qa:
     - if: $CI_COMMIT_BRANCH == "main"
 
 .cleanup_template: &cleanup_template
-  stage: deploy
+  stage: post-deploy
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
