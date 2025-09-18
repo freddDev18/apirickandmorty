@@ -54,8 +54,8 @@ stages:
   - test
   - build
   - deploy
-  - delivery
   - post-deploy
+  - delivery
 
 # Agregar caché global y políticas
 default:
@@ -267,11 +267,13 @@ deploy-qa:
       when: manual
     - if: $CI_COMMIT_BRANCH == "develop"
       when: manual
-  allow_failure: true
 
 cleanup:docker:
   <<: *cleanup_template
   image: docker:24.0
+  needs:
+    - job: deploy-qa
+      artifacts: false
   parallel:
     matrix:
       - TARGET: ["runner", "server"]
