@@ -328,7 +328,7 @@ stop_qa:
     - cp "$ENV_FILE_PROD" .env
     - echo "✓ .env file created successfully"
 
-deploy-production:
+delivery-production:
   <<: *delivery_template
   stage: delivery
   environment:

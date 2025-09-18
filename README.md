@@ -1,10 +1,11 @@
 - [Despliegue](#despliegue)
   - [Localhost](#localhost)
   - [Desarrollo con Dev Containers](#desarrollo-con-dev-containers)
-  - [Producción](#producción)
+  - [Producción manual](#producción-manual)
     - [Preparación](#preparación)
     - [Iniciar el contenedor](#iniciar-el-contenedor)
     - [Acceso a la aplicación](#acceso-a-la-aplicación)
+  - [Producción Continuos Delivery (CD)](#producción-continuos-delivery-cd)
 
 
 El proyecto usa el framework **ExpressJS** para Node.js, un entorno de ejecución de JavaScript de código abierto bajo licencia MIT. ExpressJS es útil para el desarrollo de APIs y proporciona una serie de características robustas para aplicaciones web y móviles.
@@ -45,7 +46,7 @@ Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Doc
      - La aplicación estará disponible en http://localhost:3000
 
 
-## Producción
+## Producción manual
 
 Para desplegar la aplicación en producción utilizando Docker, sigue estos pasos:
 
@@ -109,3 +110,15 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
     "containerId": "fd42c5d844b2"
   }
   ```
+
+## Producción Continuos Delivery (CD)
+El proyecto está configurado para un despliegue continuo (CD) utilizando GitLab CI/CD. A continuación, se describen los pasos para configurar y utilizar esta funcionalidad:
+1. **Agregar variables de entorno en GitLab**:
+   - Accede al proyecto en GitLab y ve a `CI/CD` > `Pipelines`.
+  - Selecciona el ultimo pipeline y haz clic en stage `delivery` para ver los jobs.
+   - Haz clic en el job `delivery-production`
+   - Agrega las siguientes variables:
+     - `SSH_USER_PROD`: Usuario SSH para el servidor de producción.
+     - `SSH_PASSWORD_PROD`: Contraseña SSH para el servidor de producción.
+2. **Ejecutar el job de despliegue**:
+   - Hacer clic en el botón `Run job` para iniciar el delivery a producción.
