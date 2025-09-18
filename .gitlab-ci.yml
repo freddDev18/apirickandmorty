@@ -326,8 +326,24 @@ stop_qa:
   before_script:
     - apk add --no-cache openssh-client sshpass rsync
     - |
+      # Verificar variables de entorno requeridas
       if [ -z "$ENV_FILE_PROD" ] || [ ! -f "$ENV_FILE_PROD" ]; then
         echo "ERROR: ENV_FILE_PROD variable is not set or file doesn't exist"
+        exit 1
+      fi
+      
+      if [ -z "$SSH_PASSWORD_PROD" ]; then
+        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
+        exit 1
+      fi
+      
+      if [ -z "$SSH_USER_PROD" ]; then
+        echo "ERROR: SSH_USER_PROD variable is not set"
+        exit 1
+      fi
+      
+      if [ -z "$SSH_HOST_PROD" ]; then
+        echo "ERROR: SSH_HOST_PROD variable is not set"
         exit 1
       fi
     - cp "$ENV_FILE_PROD" .env
