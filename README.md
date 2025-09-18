@@ -47,49 +47,47 @@ Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Doc
 
 Para desplegar la aplicación en producción utilizando Docker, sigue estos pasos:
 
-1. **Preparación**
-  - Ingresar por terminal al servidor Docker Standalone y jecutar los siguientes comandos:
-     ```console
-     # ----------------------------------
-     # ToDo: Cambiar valores de las variables según el proyecto
-     # ----------------------------------
-     export HARBOR_PROJECT=user
-     export PROJECT_ID=259
+1. Ingresar por terminal al servidor Docker Standalone y jecutar los siguientes comandos:
+  ```console
+  # ----------------------------------
+  # ToDo: Cambiar valores de las variables según el proyecto
+  # ----------------------------------
+  export HARBOR_PROJECT=user
+  export PROJECT_ID=259
 
-     # Variables de entorno para el contenedor
-     export HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
-     export IMAGE_NAME=be
-     export CI_PROJECT_NAME=${HARBOR_PROJECT}
-     export DOCKER_PATH="/opt/docker/${CI_PROJECT_NAME}"
-     export PAT=glpat-svH45ywyVqWE4kBg-85Y
-     
-     # Verificar configuración
-     echo "Directorio de trabajo: $(pwd)"
-     echo "Variables configuradas:"
-     echo "  HARBOR_REGISTRY: ${HARBOR_REGISTRY}"
-     echo "  HARBOR_PROJECT: ${HARBOR_PROJECT}"
-     echo "  IMAGE_NAME: ${IMAGE_NAME}"
-     echo "  DOCKER_PATH: ${DOCKER_PATH}"
+  # Variables de entorno para el contenedor
+  export HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
+  export IMAGE_NAME=be
+  export CI_PROJECT_NAME=${HARBOR_PROJECT}
+  export DOCKER_PATH="/opt/docker/${CI_PROJECT_NAME}"
+  export PAT=glpat-svH45ywyVqWE4kBg-85Y
+  
+  # Verificar configuración
+  echo "Directorio de trabajo: $(pwd)"
+  echo "Variables configuradas:"
+  echo "  HARBOR_REGISTRY: ${HARBOR_REGISTRY}"
+  echo "  HARBOR_PROJECT: ${HARBOR_PROJECT}"
+  echo "  IMAGE_NAME: ${IMAGE_NAME}"
+  echo "  DOCKER_PATH: ${DOCKER_PATH}"
 
-     # Crear directorio y configurar permisos
-     sudo mkdir -p "${DOCKER_PATH}"
-     sudo chown -R $(whoami):$(whoami) "${DOCKER_PATH}"
-     cd "${DOCKER_PATH}"
-     touch .env
-     ```
+  # Crear directorio y configurar permisos
+  sudo mkdir -p "${DOCKER_PATH}"
+  sudo chown -R $(whoami):$(whoami) "${DOCKER_PATH}"
+  cd "${DOCKER_PATH}"
+  touch .env
+  ```
 
-  - Copiar el archivo **compose.yml** desde el repositorio remoto.
-     ```console
-     curl -o compose.yml "http://192.168.29.74:8091/api/v4/projects/${PROJECT_ID}/repository/files/compose.yml/raw?ref=main" --header "PRIVATE-TOKEN: ${PAT}"
-     ```
+2.  Copiar el archivo **compose.yml** desde el repositorio remoto.
+  ```console
+  curl -o compose.yml "http://192.168.29.74:8091/api/v4/projects/${PROJECT_ID}/repository/files/compose.yml/raw?ref=main" --header "PRIVATE-TOKEN: ${PAT}"
+  ```
 
-  - Modificar el archivo **.env** con las variables de entorno proporcionadas en el vault de contraseñas [passbolt](https://pm.patronato.unam.mx/)
+3. Modificar el archivo **.env** con las variables de entorno proporcionadas en el vault de contraseñas [passbolt](https://pm.patronato.unam.mx/)
 
-2. **Iniciar el contenedor**
-   - Crea y ejecuta los contenedores definidos.
-     ```console
-     docker compose up -d --build
-     ```
+4. Crear y ejecutar los contenedores definidos.
+  ```console
+  docker compose up -d --build
+  ```
 
    <!-- 
    ## Migraciones y seeders
@@ -98,8 +96,7 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
      docker exec compras-be-api-1 npm run compras:db:up
      ``` 
    -->
-3. **Acceso a la aplicación**
-- La aplicación estará disponible en http://user-be.localhost, donde `localhost` es el nombre del servidor o dirección IP. Obtendras un mensaje JSON similar al siguiente
+5. La aplicación estará disponible en http://user-be.localhost, donde `localhost` es el nombre del servidor o dirección IP y obtendras un mensaje JSON similar al siguiente
   ```json
   {
     "environment": "development",
