@@ -52,13 +52,13 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
   # ----------------------------------
   # ToDo: Cambiar valores de las variables según el proyecto
   # ----------------------------------
-  export HARBOR_PROJECT=user
-  export PROJECT_ID=259
+  export CI_PROJECT_NAME=<nombre-del-proyecto>  # Ejemplo: user
+  export PROJECT_ID=<id-del-proyecto>          # Ejemplo: 259
 
   # Variables de entorno para el contenedor
   export HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
   export IMAGE_NAME=be
-  export CI_PROJECT_NAME=${HARBOR_PROJECT}
+  export HARBOR_PROJECT=${CI_PROJECT_NAME}
   export DOCKER_PATH="/opt/docker/${CI_PROJECT_NAME}"
   export PAT=glpat-svH45ywyVqWE4kBg-85Y
   
