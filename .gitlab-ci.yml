@@ -320,8 +320,19 @@ stop_qa:
   needs:
     - job: deploy-qa
       artifacts: false
-  script:
+  before_script:
     - apk add --no-cache openssh-client sshpass
+    - |
+      # Verificar variables de entorno requeridas
+      if [ -z "$SSH_USER_QA" ]; then
+        echo "ERROR: SSH_USER_QA variable is not set"
+        exit 1
+      fi
+      if [ -z "$SSH_PASSWORD_QA" ]; then
+        echo "ERROR: SSH_PASSWORD_QA variable is not set"
+        exit 1
+      fi
+  script:
     - |
       sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
         cd $REMOTE_PATH &&
