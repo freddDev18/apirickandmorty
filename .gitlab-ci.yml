@@ -20,13 +20,14 @@ variables:
   SSH_USER_QA: desarrollo
   SSH_HOST_QA: spdocker-desa-24.patronato.unam.mx
   SSH_PORT_QA: "22"
-  SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-${IMAGE_NAME}
-
-
+ 
   # Delivery config
   SSH_HOST_PROD: spdocker-pro.patronato.unam.mx
   SSH_PORT_PROD: "22"
+
+  # SSH options
+  SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+  REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-${IMAGE_NAME}
 
   # Database config (para tests)
   DB_HOST_TEST: db-e2e
@@ -256,9 +257,7 @@ deploy-qa:
     - build-app
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual  # Deploy manual en develop
     - if: $CI_COMMIT_BRANCH == "main"
-      when: manual  # Deploy manual en main también
 
 .cleanup_template: &cleanup_template
   stage: deploy
