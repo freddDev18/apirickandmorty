@@ -422,7 +422,7 @@ stop_production:
     name: production
     action: stop
   needs:
-    - job: deploy-qa
+    - job: delivery-production
       artifacts: false
   before_script:
     - apk add --no-cache openssh-client sshpass
