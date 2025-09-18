@@ -341,11 +341,6 @@ stop_qa:
         echo "ERROR: SSH_USER_PROD variable is not set"
         exit 1
       fi
-      
-      if [ -z "$SSH_HOST_PROD" ]; then
-        echo "ERROR: SSH_HOST_PROD variable is not set"
-        exit 1
-      fi
     - cp "$ENV_FILE_PROD" .env
     - echo "✓ .env file created successfully"
 
