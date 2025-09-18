@@ -397,8 +397,20 @@ stop_production:
   needs:
     - job: deploy-qa
       artifacts: false
-  script:
+  before_script:
     - apk add --no-cache openssh-client sshpass
+    - |
+      # Verificar variables de entorno requeridas
+      if [ -z "$SSH_PASSWORD_PROD" ]; then
+        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
+        exit 1
+      fi
+      
+      if [ -z "$SSH_USER_PROD" ]; then
+        echo "ERROR: SSH_USER_PROD variable is not set"
+        exit 1
+      fi
+  script:
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD "
         cd $REMOTE_PATH &&
