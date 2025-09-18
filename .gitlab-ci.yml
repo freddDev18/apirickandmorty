@@ -211,8 +211,24 @@ build-app:
   before_script:
     - apk add --no-cache openssh-client sshpass rsync
     - |
+      # Verificar variables de entorno requeridas
       if [ -z "$ENV_FILE_QA" ] || [ ! -f "$ENV_FILE_QA" ]; then
         echo "ERROR: ENV_FILE_QA variable is not set or file doesn't exist"
+        exit 1
+      fi
+      
+      if [ -z "$HARBOR_PASSWORD" ]; then
+        echo "ERROR: HARBOR_PASSWORD variable is not set"
+        exit 1
+      fi
+
+      if [ -z "$SSH_USER_QA" ]; then
+        echo "ERROR: SSH_USER_QA variable is not set"
+        exit 1
+      fi
+      
+      if [ -z "$SSH_PASSWORD_QA" ]; then
+        echo "ERROR: SSH_PASSWORD_QA variable is not set"
         exit 1
       fi
     - cp "$ENV_FILE_QA" .env
