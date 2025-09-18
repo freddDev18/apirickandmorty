@@ -54,8 +54,8 @@ stages:
   - test
   - build
   - deploy
-  - post-deploy
   - delivery
+  - post-deploy
 
 # Agregar caché global y políticas
 default:
@@ -364,8 +364,9 @@ delivery-production:
         docker compose up -d --build --remove-orphans &&
         docker compose ps
       "
-  dependencies:
-    - deploy-qa
+  needs:
+    - job: deploy-qa
+      artifacts: false 
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: manual  # Deploy manual en develop
