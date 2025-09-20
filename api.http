@@ -27,7 +27,7 @@ Content-Type: application/json
 {
   "fullName": "Hal Finney",
   "jobArea": "Cypherpunk",
-  "email": "Hal-Finney@yahoo.com"
+  "email": "Hal-Finney#yahoo.com"
 }
 
 ### Actualizar el tercer usuario

@@ -89,6 +89,7 @@ function schemaErrorHandler(err, req, res, next) {
       description: err.message,
       details: err.errors,
     });
+    return;
   }
 
   if (err.status === 500) {
@@ -98,6 +99,7 @@ function schemaErrorHandler(err, req, res, next) {
       description: err.message,
       details: err.errors,
     });
+    return;
   }
   next(err);
 }
