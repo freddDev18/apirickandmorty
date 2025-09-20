@@ -19,16 +19,22 @@ const createApp = () => {
     });
   });
 
+  // Body parser primero
   app.use(json());
+
+  // Validator ANTES de definir rutas (para validar requests)
   app.use(openApiValidator());
+
+  // Montar rutas
   routerApi(app);
 
+  // Middlewares de errores específicos
+  app.use(schemaErrorHandler);
   app.use(logErrors);
   app.use(notFoundHandler);
-  app.use(ormErrorHandler);
   app.use(boomErrorHandler);
+  app.use(ormErrorHandler);
   app.use(clientHttpErrorHandler);
-  app.use(schemaErrorHandler);
   app.use(errorHandler);
 
   return app;

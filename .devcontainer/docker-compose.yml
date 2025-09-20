@@ -17,7 +17,6 @@ services:
       - db
   db:
     image: mysql:lts
-    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
@@ -29,7 +28,6 @@ services:
       - "3306:3306"
   db-e2e:
     image: mysql:lts
-    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}_test
       - MYSQL_USER=${MYSQL_USER}

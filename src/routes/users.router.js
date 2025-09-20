@@ -31,17 +31,25 @@ router.get(
   },
 );
 
-router.get('/', async (req, res) => {
-  const users = await service.find();
-  res.json(users);
+router.get('/', async (req, res, next) => {
+  try {
+    const users = await service.find();
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post(
   '/',
-  async (req, res) => {
-    const { body } = req;
-    const newUser = await service.create(body);
-    res.status(201).json(newUser);
+  async (req, res, next) => {
+    try {
+      const { body } = req;
+      const newUser = await service.create(body);
+      res.status(201).json(newUser);
+    } catch (error) {
+      next(error);
+    }
   },
 );
 

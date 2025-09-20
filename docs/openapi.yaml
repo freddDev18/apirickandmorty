@@ -45,7 +45,7 @@ paths:
       description: Agrega un nuevo usuario
       operationId: addUser
       requestBody:
-        $ref: '#/components/requestBodies/CrearUsuario.requestBody'
+        $ref: '#/components/requestBodies/CrearUsuario'
       responses:
         '201':
           $ref: '#/components/responses/CrearUsuario.response'
@@ -100,7 +100,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/id.parameter'
       requestBody:
-        $ref: '#/components/requestBodies/ActualizarUsuario.requestBody'
+        $ref: '#/components/requestBodies/ActualizarUsuario'
       responses:
         '200':
           $ref: '#/components/responses/ActualizarUsuario.response'
@@ -195,7 +195,7 @@ components:
         - message
         - description
   requestBodies:
-    CrearUsuario.requestBody:
+    CrearUsuario:
       description: Datos para la creación de un usuario
       content:
         application/json:
@@ -219,7 +219,7 @@ components:
               - jobArea
               - email
       required: true
-    ActualizarUsuario.requestBody:
+    ActualizarUsuario:
       description: Request body para la actualización de una porción del usuario
       content:
         application/json:
