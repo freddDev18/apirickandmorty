@@ -82,6 +82,7 @@ install-dependencies:
   stage: install
   image: node:${NODE_VERSION}-alpine
   before_script:
+    - apk add --no-cache git
     - npm config set cache .npm --global
     - npm config set prefer-offline true
   script:
@@ -146,6 +147,7 @@ e2e-tests:
     - if: $CI_MERGE_REQUEST_ID
       changes:
         - "src/**/*"
+        - "e2e/**/*"
         - "test/**/*"
         - "package*.json"
         - "*.yml"
@@ -451,3 +453,20 @@ stop_production:
       when: manual
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
+
+pages:
+  stage: post-deploy
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp -r coverage/html/* public/ || cp -r coverage/* public/
+    - echo "Coverage report available at ${CI_PAGES_URL}"
+  artifacts:
+    paths:
+      - public
+    expire_in: 2 weeks
+  dependencies:
+    - e2e-tests
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
