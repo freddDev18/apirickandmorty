@@ -133,12 +133,16 @@ e2e-tests:
     - install-dependencies
   artifacts:
     when: always
+    name: "coverage-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+    expose_as: "Coverage HTML"
     reports:
       coverage_report:
         coverage_format: cobertura
         path: coverage/cobertura-coverage.xml
     paths:
-      - coverage/
+      - coverage/lcov-report/index.html
+      - coverage/lcov-report/
+      - coverage/cobertura-coverage.xml
     expire_in: 1 week
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
   rules:
@@ -453,20 +457,3 @@ stop_production:
       when: manual
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
-
-pages:
-  stage: post-deploy
-  image: alpine:latest
-  script:
-    - mkdir -p public
-    - cp -r coverage/html/* public/ || cp -r coverage/* public/
-    - echo "Coverage report available at ${CI_PAGES_URL}"
-  artifacts:
-    paths:
-      - public
-    expire_in: 2 weeks
-  dependencies:
-    - e2e-tests
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "develop"
