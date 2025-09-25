@@ -4,24 +4,38 @@
 #   - template: Security/Container-Scanning.gitlab-ci.yml
 #   - template: Security/Dependency-Scanning.gitlab-ci.yml
 variables:
-  # Docker config
+
+  # Versions
+  NODE_VERSION: "24"
+  ALPINE_VERSION: "3.22"
+  DOCKER_VERSION: "24.0"
+  MYSQL_VERSION: "8"
+
+  # Docker config (para jobs que usan Docker)
   DOCKER_HOST: unix:///var/run/docker.sock
   DOCKER_TLS_CERTDIR: ""
-  
-  # Registry config
+
+  # Server Registry config
   HARBOR_REGISTRY: harbor-utict.patronato.unam.mx
   HARBOR_PROJECT: ${CI_PROJECT_NAME}
+  HARBOR_IMAGES_PUBLIC: base-images
   HARBOR_USERNAME: desarrollo
   IMAGE_NAME: be
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}
   
-  # Deployment config
+  # Usar Harbor como proxy para imágenes públicas
+  NODE_IMAGE: ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/node:${NODE_VERSION}-alpine
+  ALPINE_IMAGE: ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/alpine:${ALPINE_VERSION}
+  DOCKER_IMAGE: ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/docker:${DOCKER_VERSION}
+  MYSQL_IMAGE: ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/mysql:${MYSQL_VERSION}
+
+  # Server Deployment config
   SSH_USER_QA: desarrollo
   SSH_HOST_QA: spdocker-desa-24.patronato.unam.mx
   SSH_PORT_QA: "22"
  
-  # Delivery config
+  # Server Delivery config
   SSH_HOST_PROD: spdocker-pro.patronato.unam.mx
   SSH_PORT_PROD: "22"
 
@@ -36,8 +50,6 @@ variables:
   DB_USER_TEST: admin
   DB_PASSWORD_TEST: qwerty123
 
-  # Node config
-  NODE_VERSION: "23"
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -48,8 +60,9 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "develop" 
     - if: $CI_MERGE_REQUEST_ID
 
-image: node:${NODE_VERSION}-alpine
+image: ${NODE_IMAGE}  # ← Imagen global por defecto para jobs sin imagen específica
 stages:
+  - cache
   - install
   - test
   - build
@@ -80,7 +93,6 @@ default:
 
 install-dependencies:
   stage: install
-  image: node:${NODE_VERSION}-alpine
   before_script:
     - apk add --no-cache git
     - npm config set cache .npm --global
@@ -110,9 +122,8 @@ lint:
 
 e2e-tests:
   stage: test
-  image: node:${NODE_VERSION}-alpine
   services:
-    - name: mysql:8
+    - name: ${MYSQL_IMAGE}
       alias: db-e2e
   variables:
     # Database configuration for e2e tests
@@ -157,11 +168,25 @@ e2e-tests:
         - "*.yml"
         - "Dockerfile"
 
+.check_vars_build_template: &check_vars_build_template
+  - |
+    # Verificar variables de entorno requeridas
+    if [ -z "$HARBOR_PASSWORD" ]; then
+      echo "ERROR: HARBOR_PASSWORD variable is not set"
+      exit 1
+    fi
+    
+    if [ -z "$SSH_PASSWORD_QA" ]; then
+      echo "ERROR: SSH_PASSWORD_QA variable is not set"
+      exit 1
+    fi
+
 build-app:
   stage: build
-  image: docker:24.0
+  image: ${DOCKER_IMAGE}
   before_script:
     - apk add --no-cache curl jq
+    - *check_vars_build_template
     - echo "Checking if Harbor project exists or creating it..."
     - |
       # Check if project exists
@@ -186,24 +211,24 @@ build-app:
       else
         echo "✓ Harbor project '$HARBOR_PROJECT' already exists"
       fi
+  script:
     - echo "Logging into Harbor registry..."
     - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
-  script:
     - echo "Building image ${FULL_IMAGE_NAME}:${IMAGE_TAG}"
     - |
       docker build \
-        --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-        --build-arg VCS_REF=$CI_COMMIT_SHORT_SHA \
+        --build-arg NODE_VERSION=${NODE_VERSION} \
+        --build-arg HARBOR_REGISTRY=${HARBOR_REGISTRY} \
+        --build-arg HARBOR_IMAGES_PUBLIC=${HARBOR_IMAGES_PUBLIC} \
         --cache-from ${FULL_IMAGE_NAME}:latest \
         -t ${FULL_IMAGE_NAME}:${IMAGE_TAG} \
         -t ${FULL_IMAGE_NAME}:latest \
-        -t ${FULL_IMAGE_NAME}:${CI_COMMIT_REF_SLUG} \
         .
     - docker push ${FULL_IMAGE_NAME}:${IMAGE_TAG}
     - docker push ${FULL_IMAGE_NAME}:latest
-    - docker push ${FULL_IMAGE_NAME}:${CI_COMMIT_REF_SLUG}
   after_script:
-    - docker logout $HARBOR_REGISTRY
+    - docker logout $HARBOR_REGISTRY || true
+    - docker system prune -f || true
   dependencies:
     - e2e-tests
     - lint
@@ -212,41 +237,26 @@ build-app:
     - if: $CI_COMMIT_BRANCH == "develop"
     # NO en merge requests - solo en ramas principales
 
-.deploy_template: &deploy_template
-  image: alpine:3.18
-  before_script:
-    - apk add --no-cache openssh-client sshpass rsync
-    - |
-      # Verificar variables de entorno requeridas
-      if [ -z "$ENV_FILE_QA" ] || [ ! -f "$ENV_FILE_QA" ]; then
-        echo "ERROR: ENV_FILE_QA variable is not set or file doesn't exist"
-        exit 1
-      fi
-      
-      if [ -z "$HARBOR_PASSWORD" ]; then
-        echo "ERROR: HARBOR_PASSWORD variable is not set"
-        exit 1
-      fi
-
-      if [ -z "$SSH_USER_QA" ]; then
-        echo "ERROR: SSH_USER_QA variable is not set"
-        exit 1
-      fi
-      
-      if [ -z "$SSH_PASSWORD_QA" ]; then
-        echo "ERROR: SSH_PASSWORD_QA variable is not set"
-        exit 1
-      fi
-    - cp "$ENV_FILE_QA" .env
-    - echo "✓ .env file created successfully"
+.check_vars_deploy_template: &check_vars_deploy_template
+  - |
+    # Verificar variables de entorno requeridas
+    if [ -z "$ENV_FILE_QA" ] || [ ! -f "$ENV_FILE_QA" ]; then
+      echo "ERROR: ENV_FILE_QA variable is not set or file doesn't exist"
+      exit 1
+    fi
 
 deploy-qa:
-  <<: *deploy_template
   stage: deploy
+  image: ${ALPINE_IMAGE}
   environment:
     name: qa
     url: http://${HARBOR_PROJECT}-${IMAGE_NAME}.${SSH_HOST_QA}
     on_stop: stop_qa
+  before_script:
+    - apk add --no-cache openssh-client sshpass rsync
+    - *check_vars_deploy_template
+    - cp "$ENV_FILE_QA" .env
+    - echo "✓ .env file created successfully"
   script:
     - echo "Deploying to QA environment..."
     - echo "Creating remote directory structure..."
@@ -268,7 +278,6 @@ deploy-qa:
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
         export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
-        export IMAGE_TAG='$IMAGE_TAG' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
@@ -282,17 +291,39 @@ deploy-qa:
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_COMMIT_BRANCH == "main"
 
-.cleanup_template: &cleanup_template
-  stage: post-deploy
+stop_qa:
+  stage: deploy
+  image: ${ALPINE_IMAGE}
+  environment:
+    name: qa
+    action: stop
+  needs:
+    - job: deploy-qa
+      artifacts: false
+  before_script:
+    - apk add --no-cache openssh-client sshpass
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
+        cd $REMOTE_PATH &&
+        export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
+        export HARBOR_PROJECT='$HARBOR_PROJECT' &&
+        export IMAGE_NAME='$IMAGE_NAME' &&
+        export IMAGE_TAG='$IMAGE_TAG' &&
+        export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
+        echo 'Stopping container: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
+        echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
+        docker compose down
+      "
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
     - if: $CI_COMMIT_BRANCH == "develop"
       when: manual
-
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+      
 cleanup:docker:
-  <<: *cleanup_template
-  image: docker:24.0
+  stage: post-deploy
+  image: ${DOCKER_IMAGE}
   needs:
     - job: deploy-qa
       artifacts: false
@@ -317,73 +348,42 @@ cleanup:docker:
           docker system df
         "
       fi
-
-stop_qa:
-  stage: deploy
-  environment:
-    name: qa
-    action: stop
-  needs:
-    - job: deploy-qa
-      artifacts: false
-  before_script:
-    - apk add --no-cache openssh-client sshpass
-    - |
-      # Verificar variables de entorno requeridas
-      if [ -z "$SSH_USER_QA" ]; then
-        echo "ERROR: SSH_USER_QA variable is not set"
-        exit 1
-      fi
-      if [ -z "$SSH_PASSWORD_QA" ]; then
-        echo "ERROR: SSH_PASSWORD_QA variable is not set"
-        exit 1
-      fi
-  script:
-    - |
-      sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
-        cd $REMOTE_PATH &&
-        export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
-        export HARBOR_PROJECT='$HARBOR_PROJECT' &&
-        export IMAGE_NAME='$IMAGE_NAME' &&
-        export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
-        docker compose down
-      "
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
 
-.delivery_template: &delivery_template
-  image: alpine:3.18
-  before_script:
-    - apk add --no-cache openssh-client sshpass rsync
-    - |
-      # Verificar variables de entorno requeridas
-      if [ -z "$ENV_FILE_PROD" ] || [ ! -f "$ENV_FILE_PROD" ]; then
-        echo "ERROR: ENV_FILE_PROD variable is not set or file doesn't exist"
-        exit 1
-      fi
-      
-      if [ -z "$SSH_USER_PROD" ]; then
-        echo "ERROR: SSH_USER_PROD variable is not set"
-        exit 1
-      fi
-      
-      if [ -z "$SSH_PASSWORD_PROD" ]; then
-        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
-        exit 1
-      fi
-    - cp "$ENV_FILE_PROD" .env
-    - echo "✓ .env file created successfully"
-
+.check_vars_delivery_template: &check_vars_delivery_template
+  - |
+    # Verificar variables de entorno requeridas
+    if [ -z "$ENV_FILE_PROD" ] || [ ! -f "$ENV_FILE_PROD" ]; then
+      echo "ERROR: ENV_FILE_PROD variable is not set or file doesn't exist"
+      exit 1
+    fi
+    
+    if [ -z "$SSH_USER_PROD" ]; then
+      echo "ERROR: SSH_USER_PROD variable is not set"
+      exit 1
+    fi
+    
+    if [ -z "$SSH_PASSWORD_PROD" ]; then
+      echo "ERROR: SSH_PASSWORD_PROD variable is not set"
+      exit 1
+    fi
+  
 delivery-production:
-  <<: *delivery_template
   stage: delivery
+  image: ${ALPINE_IMAGE}
   environment:
     name: production
     url: http://${HARBOR_PROJECT}-${IMAGE_NAME}.${SSH_HOST_PROD}
     on_stop: stop_production
+  before_script:
+    - apk add --no-cache openssh-client sshpass rsync
+    - *check_vars_delivery_template
+    - cp "$ENV_FILE_PROD" .env
+    - echo "✓ .env file created successfully"
   script:
     - echo "Deploying to Production environment..."
     - echo "Creating remote directory structure..."
@@ -408,11 +408,13 @@ delivery-production:
         export IMAGE_TAG='$IMAGE_TAG' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
-        echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose pull &&
         docker compose up -d --build --remove-orphans &&
         docker compose ps
       "
+  after_script:
+    - docker logout $HARBOR_REGISTRY || true
+    - docker system prune -f || true
   needs:
     - job: deploy-qa
       artifacts: false 
@@ -424,6 +426,7 @@ delivery-production:
 
 stop_production:
   stage: delivery
+  image: ${ALPINE_IMAGE}
   environment:
     name: production
     action: stop
@@ -432,16 +435,6 @@ stop_production:
       artifacts: false
   before_script:
     - apk add --no-cache openssh-client sshpass
-    - |
-      # Verificar variables de entorno requeridas
-      if [ -z "$SSH_USER_PROD" ]; then
-        echo "ERROR: SSH_USER_PROD variable is not set"
-        exit 1
-      fi
-      if [ -z "$SSH_PASSWORD_PROD" ]; then
-        echo "ERROR: SSH_PASSWORD_PROD variable is not set"
-        exit 1
-      fi
   script:
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD "
@@ -450,6 +443,8 @@ stop_production:
         export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
+        echo 'Stopping container: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
+        echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose down
       "
   rules:
@@ -457,3 +452,103 @@ stop_production:
       when: manual
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
+
+# Job para cachear imágenes base en Harbor
+cache-base-images:
+  stage: cache
+  image: docker:24.0
+  variables:
+    # Lista de imágenes base que usamos en el pipeline
+    BASE_IMAGES: |
+      node:${NODE_VERSION}-alpine
+      alpine:${ALPINE_VERSION}
+      docker:${DOCKER_VERSION}
+      mysql:${MYSQL_VERSION}
+  before_script:
+    - apk add --no-cache curl jq
+    - |
+      # Login a Harbor
+      if [ ! -z "$HARBOR_USERNAME" ] && [ ! -z "$HARBOR_PASSWORD" ]; then
+          echo "Authenticating with Harbor registry..."
+          echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
+      elif [ -z "$HARBOR_USERNAME" ] || [ -z "$HARBOR_PASSWORD" ]; then
+          echo "WARNING: HARBOR_USERNAME or HARBOR_PASSWORD is not set. Skipping Harbor authentication."
+      fi
+      
+      # Crear proyecto base-images si no existe
+      echo "Checking if Harbor cache project exists or creating it..."
+      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_IMAGES_PUBLIC" | jq -e ".[] | select(.name == \"$HARBOR_IMAGES_PUBLIC\")" > /dev/null && echo 1 || echo 0)
+
+      if [ "$PROJECT_EXISTS" -eq "0" ]; then
+        echo "Creating Harbor cache project '$HARBOR_IMAGES_PUBLIC'..."
+        curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" \
+          -H "Content-Type: application/json" \
+          -d "{\"project_name\": \"$HARBOR_IMAGES_PUBLIC\", \"public\": true}" \
+          -o /dev/null
+        
+        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_IMAGES_PUBLIC" | jq -e ".[] | select(.name == \"$HARBOR_IMAGES_PUBLIC\")" > /dev/null && echo 1 || echo 0)
+        if [ "$PROJECT_CREATED" -eq "0" ]; then
+          echo "Failed to create Harbor cache project '$HARBOR_IMAGES_PUBLIC'"
+          exit 1
+        else
+          echo "✓ Harbor cache project '$HARBOR_IMAGES_PUBLIC' created successfully"
+        fi
+      else
+        echo "✓ Harbor cache project '$HARBOR_IMAGES_PUBLIC' already exists"
+      fi
+  script:
+    - |
+      echo "Caching base images to Harbor..."
+      echo "$BASE_IMAGES" | while IFS= read -r image; do
+        # Omitir líneas vacías
+        [ -z "$image" ] && continue
+        
+        echo "Processing image: $image"
+        
+        # Construir nombres de imagen
+        harbor_image="${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/${image}"
+        
+        # Verificar si la imagen ya existe en Harbor
+        echo "Checking if $harbor_image exists in Harbor..."
+        if docker manifest inspect "$harbor_image" >/dev/null 2>&1; then
+          echo "✓ Image $harbor_image already exists in Harbor, skipping..."
+          continue
+        fi
+        
+        # Descargar imagen de Docker Hub
+        echo "Pulling $image from Docker Hub..."
+        if docker pull "$image"; then
+          echo "✓ Successfully pulled $image"
+          
+          # Etiquetar para Harbor
+          echo "Tagging $image as $harbor_image"
+          docker tag "$image" "$harbor_image"
+          
+          # Subir a Harbor
+          echo "Pushing $harbor_image to Harbor..."
+          if docker push "$harbor_image"; then
+            echo "✓ Successfully pushed $harbor_image to Harbor"
+          else
+            echo "✗ Failed to push $harbor_image to Harbor"
+          fi
+          
+          # Limpiar imagen local para ahorrar espacio
+          docker rmi "$image" "$harbor_image" || true
+        else
+          echo "✗ Failed to pull $image from Docker Hub"
+        fi
+        
+        echo "---"
+      done
+  after_script:
+    - docker logout $HARBOR_REGISTRY || true
+    - docker system prune -f || true
+  rules:
+    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_COMMIT_BRANCH == "develop"  
+      when: manual
+    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_MERGE_REQUEST_ID
+      when: manual
+    - when: never  # ← Oculta completamente si la variable no está definida
+  

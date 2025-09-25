@@ -1,11 +1,10 @@
-# syntax=docker/dockerfile:1
-# Se proporcionan comentarios a lo largo de este archivo para ayudarte a comenzar.
-# Si necesitas más ayuda, visita la guía de referencia de Dockerfile en
-# https://docs.docker.com/go/dockerfile-reference/
 
-ARG NODE_VERSION=23
+ARG NODE_VERSION=24
+ARG HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
+ARG HARBOR_CACHE_PROJECT=base-images
+ARG ALPINE_VERSION=22
 
-FROM node:${NODE_VERSION}-alpine AS builder
+FROM ${HARBOR_REGISTRY}/${HARBOR_CACHE_PROJECT}/node:${NODE_VERSION}-alpine AS builder
 
 # Usar production node environment por default.
 ENV NODE_ENV=production
@@ -25,7 +24,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 COPY . .
 
 # Construir la aplicación
-FROM alpine AS runner
+FROM ${HARBOR_REGISTRY}/${HARBOR_CACHE_PROJECT}/alpine:${ALPINE_VERSION} AS runner
 
 RUN apk add --update --no-cache nodejs npm
 
