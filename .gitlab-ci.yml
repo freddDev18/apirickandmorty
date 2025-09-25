@@ -282,6 +282,7 @@ deploy-qa:
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
         export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
+        export IMAGE_TAG='$IMAGE_TAG' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
