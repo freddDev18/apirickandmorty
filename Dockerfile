@@ -1,10 +1,10 @@
 
 ARG NODE_VERSION=24
 ARG HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
-ARG HARBOR_CACHE_PROJECT=base-images
+ARG HARBOR_IMAGES_PUBLIC=base-images
 ARG ALPINE_VERSION=22
 
-FROM ${HARBOR_REGISTRY}/${HARBOR_CACHE_PROJECT}/node:${NODE_VERSION}-alpine AS builder
+FROM ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/node:${NODE_VERSION}-alpine AS builder
 
 # Usar production node environment por default.
 ENV NODE_ENV=production
@@ -24,7 +24,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 COPY . .
 
 # Construir la aplicación
-FROM ${HARBOR_REGISTRY}/${HARBOR_CACHE_PROJECT}/alpine:${ALPINE_VERSION} AS runner
+FROM ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/alpine:${ALPINE_VERSION} AS runner
 
 RUN apk add --update --no-cache nodejs npm
 
