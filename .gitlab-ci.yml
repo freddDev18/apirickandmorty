@@ -417,9 +417,6 @@ delivery-production:
         docker compose up -d --build --remove-orphans &&
         docker compose ps
       "
-  after_script:
-    - docker logout $HARBOR_REGISTRY || true
-    - docker system prune -f || true
   needs:
     - job: deploy-qa
       artifacts: false 
@@ -447,6 +444,7 @@ stop_production:
         export HARBOR_REGISTRY='$HARBOR_REGISTRY' &&
         export HARBOR_PROJECT='$HARBOR_PROJECT' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
+        export IMAGE_TAG='$IMAGE_TAG' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Stopping container: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
