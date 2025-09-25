@@ -223,6 +223,7 @@ build-app:
         --build-arg NODE_VERSION=${NODE_VERSION} \
         --build-arg HARBOR_REGISTRY=${HARBOR_REGISTRY} \
         --build-arg HARBOR_IMAGES_PUBLIC=${HARBOR_IMAGES_PUBLIC} \
+        --build-arg ALPINE_VERSION=${ALPINE_VERSION} \
         --cache-from ${FULL_IMAGE_NAME}:latest \
         -t ${FULL_IMAGE_NAME}:${IMAGE_TAG} \
         -t ${FULL_IMAGE_NAME}:latest \
