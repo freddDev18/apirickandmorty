@@ -81,6 +81,9 @@ default:
 install-dependencies:
   stage: install
   image: node:${NODE_VERSION}-alpine
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    GIT_CLEAN_FLAGS: -ffdx
   before_script:
     - apk add --no-cache git
     - npm config set cache .npm --global
