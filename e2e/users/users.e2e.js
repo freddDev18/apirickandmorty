@@ -1,4 +1,7 @@
+import { expect } from 'vitest';
+import getUser from '../queries/user.queries.js';
 import { api } from '../test/setup.js';
+import fixtures from '../utils/fixtures.js';
 
 describe('Pruebas a users', () => {
   const usersEndPoint = '/api/v1/users';
@@ -46,6 +49,28 @@ describe('Pruebas a users', () => {
       expect(typeof response.body).toBe('object');
       expect(response.body).toHaveProperty('code');
       expect(response.body.code).toBe('400');
+    });
+  });
+
+  describe('POST /users/', () => {
+    test('Debería retornar la respuesta esperada y estatus 201', async () => {
+      const response = await api.post(usersEndPoint).send(fixtures.user);
+      const user = await getUser(fixtures.user.email);
+
+      expect(response).toBeTruthy();
+      expect(response.statusCode).toBe(201);
+      expect(user.email).toBe(fixtures.user.email);
+      expect(user.jobArea).toBe(fixtures.user.jobArea);
+      expect(user.firstName).toBe(fixtures.user.firstName);
+    });
+    test('Debería retornar error 422 por correo en uso', async () => {
+      const response = await api.post(usersEndPoint).send(fixtures.user);
+
+      expect(response).toBeTruthy();
+      expect(response.statusCode).toBe(422);
+      expect(typeof response.body).toBe('object');
+      expect(response.body).toHaveProperty('code');
+      expect(response.body.code).toBe('422');
     });
   });
 });
