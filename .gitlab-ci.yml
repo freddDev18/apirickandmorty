@@ -135,7 +135,6 @@ e2e-tests:
     MYSQL_PASSWORD: ${DB_PASSWORD_TEST}
     MYSQL_ROOT_PASSWORD: root
     # Application environment variables
-    NODE_ENV: e2e
     DB_HOST_APP: ${DB_HOST_TEST}
     DB_PORT_APP: ${DB_PORT_TEST}
     DB_NAME_APP: ${DB_NAME_TEST}
