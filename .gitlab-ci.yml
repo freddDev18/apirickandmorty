@@ -74,6 +74,14 @@ stages:
 default:
   tags:
     - utict
+  cache:
+    key: 
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+      - .npm/
+    policy: pull-push
   retry:
     max: 2
     when:
@@ -100,14 +108,6 @@ install-dependencies:
     - npm config set cache .npm --global
   script:
      - npm ci --no-audit
-  cache:
-    key: 
-      files:
-        - package-lock.json
-    paths:
-      - node_modules/
-      - .npm/
-    policy: pull-push
 
 lint:
   stage: test
