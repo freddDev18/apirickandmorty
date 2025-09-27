@@ -74,17 +74,6 @@ stages:
 default:
   tags:
     - utict
-  cache:
-    - key: 
-        files:
-          - package-lock.json
-      paths:
-        - node_modules/
-      policy: pull-push
-    - key: npm-cache
-      paths:
-        - .npm/
-      policy: pull-push
   retry:
     max: 2
     when:
