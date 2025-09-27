@@ -100,9 +100,14 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
 ## Producción Continuos Delivery (CD)
 El proyecto está configurado para un despliegue continuo (CD) utilizando GitLab CI/CD. A continuación, se describen los pasos para configurar y utilizar esta funcionalidad:
 
-  1. Accede al proyecto en GitLab y ve a `CI/CD` > `Pipelines`.
-  2. Selecciona el ultimo pipeline, haz clic en stage `delivery` y luego en el job `delivery-production`
-  3. Agrega las siguientes variables:
+  1. Configura las variables de entorno en GitLab:
+     - Accede al proyecto en GitLab y ve a `Settings` > `CI/CD` > `Variables` y agrega las siguientes variables como protegidas (protected) y enmascaradas (masked):
      - `SSH_USER_PROD`: Usuario SSH para el servidor de producción.
      - `SSH_PASSWORD_PROD`: Contraseña SSH para el servidor de producción.
-  4. Hacer clic en el botón `Run job` para iniciar el delivery a producción.
+  2. Despliega el proyecto en GitLab:
+     - Accede a `CI/CD` > `Pipelines` y selecciona el ultimo pipeline, haz clic en stage `delivery` y luego en el job `delivery-production`
+     - Hacer clic en el botón `Run job` para iniciar el delivery a producción.
+  3. Monitorea y verifica el despliegue:
+     - Observa la salida del job para asegurarte de que el despliegue se complete sin errores.
+     - Verifica que la aplicación esté funcionando accediendo a la URL de producción, disponible en Deployments > Environments > Production > Open.
+  4. Elimina las variables de entorno registradas en el paso 1 para mantener la seguridad.

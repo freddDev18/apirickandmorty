@@ -398,12 +398,6 @@ cleanup:docker:
       exit 1
     fi
 
-.clean_vars_sensitive: &clean_vars_sensitive
-  - |
-    # Sobrescribir variables sensibles con valores vacíos
-    export SSH_USER_PROD=""
-    export SSH_PASSWORD_PROD=""
-
 delivery-production:
   stage: delivery
   image: ${ALPINE_IMAGE}
@@ -444,8 +438,6 @@ delivery-production:
         docker compose up -d --build --remove-orphans &&
         docker compose ps
       "
-  after_script:
-    - *clean_vars_sensitive
   needs:
     - job: deploy-qa
       artifacts: false 
@@ -480,8 +472,6 @@ stop_production:
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose down
       "
-  after_script:
-    - *clean_vars_sensitive
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: manual
