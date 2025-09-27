@@ -100,13 +100,14 @@ default:
     done
   - | # si alguna submodule quedó shallow:
     git submodule foreach 'git fetch --all || true; git fetch --unshallow || true'
+  - git submodule sync --recursive
+  - git submodule update --init --recursive
 
 install-dependencies:
   stage: install
   before_script:
     - apk add --no-cache git
     - *clean_shadow_submodules
-    - git submodule update --init --recursive
     - npm config set cache .npm --global
   script:
      - npm ci --no-audit
