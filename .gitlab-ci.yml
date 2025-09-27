@@ -145,10 +145,19 @@ e2e-tests:
     DB_NAME_APP: ${DB_NAME_TEST}
     DB_USER_APP: ${DB_USER_TEST}
     DB_PASSWORD_APP: ${DB_PASSWORD_TEST}
+  before_script:
+    - apk add --no-cache git
+    - npm config set cache .npm --global
+    # Si no existe node_modules o falta vitest, instalar (aprovecha cache)
+    - |
+      if [ ! -d node_modules ] || [ ! -x node_modules/.bin/vitest ]; then
+        echo "node_modules missing or vitest absent — running npm ci"
+        npm ci --no-audit --prefer-offline
+      else
+        echo "node_modules present, skipping npm ci"
+      fi
   script:
     - npm run e2e:coverage
-  dependencies:
-    - install-dependencies
   artifacts:
     when: always
     name: "coverage-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
