@@ -60,7 +60,6 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "develop" 
     - if: $CI_MERGE_REQUEST_ID
 
-image: ${NODE_IMAGE}  # ← Imagen global por defecto para jobs sin imagen específica
 stages:
   - cache
   - install
@@ -74,6 +73,7 @@ stages:
 default:
   tags:
     - utict
+  image: ${NODE_IMAGE}
   cache:
     key: 
       files:
