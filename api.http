@@ -25,9 +25,9 @@ POST {{baseUrl}}/api/v1/users
 Content-Type: application/json
 
 {
-  "fullName": "Hal Finney",
-  "jobArea": "Cypherpunk",
-  "email": "Hal-Finney#yahoo.com"
+  "fullName": "Ctlase E2e",
+  "jobArea": "tPruebas",
+  "email": "tclase@hotmail.com"
 }
 
 ### Actualizar el tercer usuario

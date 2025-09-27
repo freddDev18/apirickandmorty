@@ -10,8 +10,16 @@ class UsersService {
       id: faker.string.uuid(),
       ...data,
     };
-    User.create(newUser);
-    return newUser;
+    const existingEmail = await User.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+    if (existingEmail) {
+      throw boom.badData('El correo electrónico ya está en uso');
+    }
+    const created = await User.create(newUser);
+    return created;
   }
 
   async find() {
