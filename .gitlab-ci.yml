@@ -400,10 +400,9 @@ cleanup:docker:
 
 .clean_vars_sensitive: &clean_vars_sensitive
   - |
-    # Limpiar variables sensibles del entorno
-    unset SSH_USER_PROD
-    unset SSH_PASSWORD_PROD
-
+    # Sobrescribir variables sensibles con valores vacíos
+    export SSH_USER_PROD=""
+    export SSH_PASSWORD_PROD=""
 
 delivery-production:
   stage: delivery
@@ -488,7 +487,7 @@ stop_production:
       when: manual
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
-      
+
 # Job para cachear imágenes base en Harbor
 cache-base-images:
   stage: cache
