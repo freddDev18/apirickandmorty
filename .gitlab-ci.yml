@@ -112,8 +112,6 @@ install-dependencies:
   script:
      - npm ci --no-audit
   artifacts:
-    when: on_success
-    access: all
     expire_in: "7 days"
   cache:
     key: 
