@@ -91,21 +91,25 @@ default:
       - runner_system_failure
       - stuck_or_timeout_failure
 
+.clean_shadow_submodules: &clean_shadow_submodules
+  - |  # Limpiar submódulos para evitar problemas con cambios en .gitmodules
+    for path in $(git config --file .gitmodules --get-regexp path | awk '{print $2}'); do
+      echo "Cleaning submodule $path"
+      rm -rf "$path"                         # borra la copia de trabajo
+      rm -rf ".git/modules/$path"            # borra metadata interna del submódulo
+    done
+  - | # si alguna submodule quedó shallow:
+    git submodule foreach 'git fetch --all || true; git fetch --unshallow || true'
+
 install-dependencies:
   stage: install
-  variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-    GIT_CLEAN_FLAGS: -ffdx
   before_script:
     - apk add --no-cache git
+    - *clean_shadow_submodules
+    - git submodule update --init --recursive
     - npm config set cache .npm --global
-    - npm config set prefer-offline true
   script:
      - npm ci --no-audit
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - node_modules/
   cache:
     key: 
       files:
@@ -170,25 +174,16 @@ e2e-tests:
         - "*.yml"
         - "Dockerfile"
 
-.check_vars_build_template: &check_vars_build_template
-  - |
-    # Verificar variables de entorno requeridas
-    if [ -z "$HARBOR_PASSWORD" ]; then
-      echo "ERROR: HARBOR_PASSWORD variable is not set"
-      exit 1
-    fi
-    
-    if [ -z "$SSH_PASSWORD_QA" ]; then
-      echo "ERROR: SSH_PASSWORD_QA variable is not set"
-      exit 1
-    fi
-
 build-app:
   stage: build
   image: ${DOCKER_IMAGE}
   before_script:
     - apk add --no-cache curl jq
-    - *check_vars_build_template
+    - |    
+      if [ -z "$HARBOR_PASSWORD" ]; then
+        echo "ERROR: HARBOR_PASSWORD variable is not set"
+        exit 1
+      fi
     - echo "Checking if Harbor project exists or creating it..."
     - |
       # Check if project exists
@@ -248,6 +243,16 @@ build-app:
       exit 1
     fi
 
+    if [ -z "$HARBOR_PASSWORD" ]; then
+      echo "ERROR: HARBOR_PASSWORD variable is not set"
+      exit 1
+    fi
+
+    if [ -z "$SSH_PASSWORD_QA" ]; then
+      echo "ERROR: SSH_PASSWORD_QA variable is not set"
+      exit 1
+    fi
+
 deploy-qa:
   stage: deploy
   image: ${ALPINE_IMAGE}
@@ -260,20 +265,18 @@ deploy-qa:
     - *check_vars_deploy_template
     - cp "$ENV_FILE_QA" .env
     - echo "✓ .env file created successfully"
-  script:
-    - echo "Deploying to QA environment..."
     - echo "Creating remote directory structure..."
     - |
       sshpass -p "$SSH_PASSWORD_QA" ssh -tt -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA \
         "echo '$SSH_PASSWORD_QA' | sudo -S mkdir -p $REMOTE_PATH && \
-         echo '$SSH_PASSWORD_QA' | sudo -S chown $SSH_USER_QA:$SSH_USER_QA $REMOTE_PATH"
-    
+        echo '$SSH_PASSWORD_QA' | sudo -S chown $SSH_USER_QA:$SSH_USER_QA $REMOTE_PATH"
+  script:
+    - echo "Deploying to QA environment..."    
     - echo "Copying deployment files..."
     - |
       sshpass -p "$SSH_PASSWORD_QA" rsync -avz --timeout=60 \
         -e "ssh -p $SSH_PORT_QA $SSH_OPTIONS" \
-        compose.yml .env $SSH_USER_QA@$SSH_HOST_QA:$REMOTE_PATH/
-    
+        compose.yml .env $SSH_USER_QA@$SSH_HOST_QA:$REMOTE_PATH/   
     - echo "Executing deployment..."
     - |
       sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
@@ -306,6 +309,7 @@ stop_qa:
       artifacts: false
   before_script:
     - apk add --no-cache openssh-client sshpass
+    - .check_vars_deploy_template
   script:
     - |
       sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
@@ -334,6 +338,8 @@ cleanup:docker:
   parallel:
     matrix:
       - TARGET: ["runner", "server"]
+  before_script:
+    - .exists_var_ssh_password_qa
   script:
     - |
       if [ "$TARGET" == "runner" ]; then
@@ -435,6 +441,7 @@ stop_production:
     - job: delivery-production
       artifacts: false
   before_script:
+    - *check_vars_delivery_template
     - apk add --no-cache openssh-client sshpass
   script:
     - |
