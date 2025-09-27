@@ -349,7 +349,14 @@ cleanup:docker:
     matrix:
       - TARGET: ["runner", "server"]
   before_script:
-    - .exists_var_ssh_password_qa
+    - |
+      if [ "$TARGET" == "server" ]; then
+        apk add --no-cache openssh-client sshpass
+        if [ -z "$SSH_PASSWORD_QA" ]; then
+          echo "ERROR: SSH_PASSWORD_QA variable is not set"
+          exit 1
+        fi
+      fi
   script:
     - |
       if [ "$TARGET" == "runner" ]; then
@@ -360,7 +367,6 @@ cleanup:docker:
         docker system df
       else
         echo "Cleaning up remote Docker resources..."
-        apk add --no-cache openssh-client sshpass
         sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
           docker image prune -a --force &&
           docker container prune --force &&
