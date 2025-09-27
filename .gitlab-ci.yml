@@ -111,8 +111,6 @@ install-dependencies:
     - npm config set cache .npm --global
   script:
      - npm ci --no-audit
-  artifacts:
-    expire_in: "7 days"
   cache:
     key: 
       files:
