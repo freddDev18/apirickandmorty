@@ -481,6 +481,7 @@ cache-base-images:
       alpine:${ALPINE_VERSION}
       docker:${DOCKER_VERSION}
       mysql:${MYSQL_VERSION}
+      nginx:alpine
   before_script:
     - apk add --no-cache curl jq
     - |
