@@ -1,10 +1,8 @@
+# Usar imagenes por defecto si no se pasan como argumentos de build
+ARG NODE_IMAGE=node:24-alpine
+ARG ALPINE_IMAGE=alpine:3.22
 
-ARG NODE_VERSION=24
-ARG HARBOR_REGISTRY=harbor-utict.patronato.unam.mx
-ARG HARBOR_IMAGES_PUBLIC=base-images
-ARG ALPINE_VERSION=3.22
-
-FROM ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/node:${NODE_VERSION}-alpine AS builder
+FROM ${NODE_IMAGE} AS builder
 
 # Usar production node environment por default.
 ENV NODE_ENV=production
@@ -24,7 +22,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 COPY . .
 
 # Construir la aplicación
-FROM ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/alpine:${ALPINE_VERSION} AS runner
+FROM ${ALPINE_IMAGE} AS final
 
 RUN apk add --update --no-cache nodejs npm
 
