@@ -1,6 +1,6 @@
 services:
   api:
-    image: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}:${IMAGE_TAG}
+    image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}
     pull_policy: always
     # Solo descomentar si se quiere construir la imagen localmente
     # build:
@@ -21,7 +21,7 @@ services:
     environment:
       - TZ=America/Mexico_City
     depends_on:
-    - db
+      - db
   db:
     image: mysql:8
     restart: on-failure:5
