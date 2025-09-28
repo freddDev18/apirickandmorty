@@ -47,3 +47,7 @@ README.md
 # Ignore CI/CD configuration files
 .circleci/
 .gitlab-ci.yml
+
+# Ignore template files
+templates/
+*.template
