@@ -10,6 +10,7 @@ variables:
   ALPINE_VERSION: "3.22"
   DOCKER_VERSION: "24.0"
   MYSQL_VERSION: "8"
+  MSSQLSERVER_VERSION: "2022"
 
   # Docker config (para jobs que usan Docker)
   DOCKER_HOST: unix:///var/run/docker.sock
