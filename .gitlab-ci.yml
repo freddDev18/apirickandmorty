@@ -1,8 +1,12 @@
-# Seguridad con las plantillas de seguridad
-# include:
-#   - template: Security/SAST.gitlab-ci.yml
-#   - template: Security/Container-Scanning.gitlab-ci.yml
-#   - template: Security/Dependency-Scanning.gitlab-ci.yml
+include:
+  - local: "templates/e2e-tests.gitlab-ci.yml"
+# Descomentar si se desea limpieza de Docker y cacheo de imágenes base
+  # - local: "templates/cleanup-docker.gitlab-ci.yml"
+  # - local: "templates/cache-base-images.gitlab-ci.yml"
+# Seguridad (deshabilitado por ahora, activar si se requiere)
+  # - template: Security/SAST.gitlab-ci.yml
+  # - template: Security/Container-Scanning.gitlab-ci.yml
+  # - template: Security/Dependency-Scanning.gitlab-ci.yml
 variables:
 
   # Versions
@@ -46,14 +50,6 @@ variables:
   # SSH options
   SSH_OPTIONS: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
   REMOTE_PATH: /opt/docker/${HARBOR_PROJECT}-${IMAGE_NAME}
-
-  # Database config (para tests)
-  DB_HOST_TEST: db-e2e
-  DB_PORT_TEST: "3306"
-  DB_NAME_TEST: mysqldb_test
-  DB_USER_TEST: admin
-  DB_PASSWORD_TEST: qwerty123
-
 
 # Al inicio del archivo, agrega workflow global
 workflow:
@@ -124,61 +120,6 @@ lint:
     - if: $CI_COMMIT_BRANCH == "develop"
     - if: $CI_MERGE_REQUEST_ID
 
-e2e-tests:
-  stage: test
-  services:
-    - name: ${MYSQL_IMAGE}
-      alias: db-e2e
-  variables:
-    # Database configuration for e2e tests
-    MYSQL_DATABASE: ${DB_NAME_TEST}
-    MYSQL_USER: ${DB_USER_TEST}
-    MYSQL_PASSWORD: ${DB_PASSWORD_TEST}
-    MYSQL_ROOT_PASSWORD: root
-    # Application environment variables
-    DB_HOST_APP: ${DB_HOST_TEST}
-    DB_PORT_APP: ${DB_PORT_TEST}
-    DB_NAME_APP: ${DB_NAME_TEST}
-    DB_USER_APP: ${DB_USER_TEST}
-    DB_PASSWORD_APP: ${DB_PASSWORD_TEST}
-  before_script:
-    - apk add --no-cache git
-    - npm config set cache .npm --global
-    # Si no existe node_modules o falta vitest, instalar (aprovecha cache)
-    - |
-      if [ ! -d node_modules ] || [ ! -x node_modules/.bin/vitest ]; then
-        echo "node_modules missing or vitest absent — running npm ci"
-        npm ci --no-audit --prefer-offline
-      else
-        echo "node_modules present, skipping npm ci"
-      fi
-  script:
-    - npm run e2e:coverage
-  artifacts:
-    when: always
-    name: "coverage-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
-    expose_as: "Coverage HTML"
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage/cobertura-coverage.xml
-    paths:
-      - coverage/lcov-report/index.html
-      - coverage/lcov-report/
-      - coverage/cobertura-coverage.xml
-    expire_in: 1 week
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "develop"
-    - if: $CI_MERGE_REQUEST_ID
-      changes:
-        - "src/**/*"
-        - "e2e/**/*"
-        - "test/**/*"
-        - "package*.json"
-        - "*.yml"
-        - "Dockerfile"
 # -------------------------------------------------------------
 # Jobs de construcción, despliegue y entrega
 # -------------------------------------------------------------
@@ -434,154 +375,3 @@ stop_production:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual
     # NO en merge requests - solo en ramas principales
-
-
-# ---------------------------------------------
-# Job para limpieza de recursos Docker
-# ---------------------------------------------
-cleanup:docker:
-  stage: post-deploy
-  image: ${DOCKER_IMAGE}
-  needs:
-    - job: deploy-qa
-      artifacts: false
-  parallel:
-    matrix:
-      - TARGET: ["runner", "server"]
-  before_script:
-    - |
-      if [ "$TARGET" == "server" ]; then
-        apk add --no-cache openssh-client sshpass
-        if [ -z "$SSH_PASSWORD_QA" ]; then
-          echo "ERROR: SSH_PASSWORD_QA variable is not set"
-          exit 1
-        fi
-      fi
-  script:
-    - |
-      if [ "$TARGET" == "runner" ]; then
-        echo "Cleaning up local Docker resources..."
-        docker image prune -a --force
-        docker container prune --force
-        docker volume prune --force
-        docker system df
-      else
-        echo "Cleaning up remote Docker resources..."
-        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
-          docker image prune -a --force &&
-          docker container prune --force &&
-          docker volume prune --force &&
-          docker system df
-        "
-      fi
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      when: manual
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual
-    # NO en merge requests - solo en ramas principales
-
-# ---------------------------------------------
-# Job para cachear imágenes base en Harbor
-# ---------------------------------------------
-cache-base-images:
-  stage: cache
-  image: docker:24.0
-  variables:
-    # Lista de imágenes base que usamos en el pipeline
-    BASE_IMAGES: |
-      node:${NODE_VERSION}-alpine
-      alpine:${ALPINE_VERSION}
-      docker:${DOCKER_VERSION}
-      mysql:${MYSQL_VERSION}
-      mcr.microsoft.com/mssql/server:${MSSQLSERVER_VERSION}-latest
-      atmoz/sftp
-      nginx:alpine
-  before_script:
-    - apk add --no-cache curl jq
-    - |
-      # Login a Harbor
-      if [ ! -z "$HARBOR_USERNAME" ] && [ ! -z "$HARBOR_PASSWORD" ]; then
-          echo "Authenticating with Harbor registry..."
-          echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
-      elif [ -z "$HARBOR_USERNAME" ] || [ -z "$HARBOR_PASSWORD" ]; then
-          echo "WARNING: HARBOR_USERNAME or HARBOR_PASSWORD is not set. Skipping Harbor authentication."
-      fi
-      
-      # Crear proyecto base-images si no existe
-      echo "Checking if Harbor cache project exists or creating it..."
-      PROJECT_EXISTS=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_IMAGES_PUBLIC" | jq -e ".[] | select(.name == \"$HARBOR_IMAGES_PUBLIC\")" > /dev/null && echo 1 || echo 0)
-
-      if [ "$PROJECT_EXISTS" -eq "0" ]; then
-        echo "Creating Harbor cache project '$HARBOR_IMAGES_PUBLIC'..."
-        curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X POST "https://$HARBOR_REGISTRY/api/v2.0/projects" \
-          -H "Content-Type: application/json" \
-          -d "{\"project_name\": \"$HARBOR_IMAGES_PUBLIC\", \"public\": true}" \
-          -o /dev/null
-        
-        PROJECT_CREATED=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X GET "https://$HARBOR_REGISTRY/api/v2.0/projects?name=$HARBOR_IMAGES_PUBLIC" | jq -e ".[] | select(.name == \"$HARBOR_IMAGES_PUBLIC\")" > /dev/null && echo 1 || echo 0)
-        if [ "$PROJECT_CREATED" -eq "0" ]; then
-          echo "Failed to create Harbor cache project '$HARBOR_IMAGES_PUBLIC'"
-          exit 1
-        else
-          echo "✓ Harbor cache project '$HARBOR_IMAGES_PUBLIC' created successfully"
-        fi
-      else
-        echo "✓ Harbor cache project '$HARBOR_IMAGES_PUBLIC' already exists"
-      fi
-  script:
-    - |
-      echo "Caching base images to Harbor..."
-      echo "$BASE_IMAGES" | while IFS= read -r image; do
-        # Omitir líneas vacías
-        [ -z "$image" ] && continue
-        
-        echo "Processing image: $image"
-        
-        # Construir nombres de imagen
-        harbor_image="${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/${image}"
-        
-        # Verificar si la imagen ya existe en Harbor
-        echo "Checking if $harbor_image exists in Harbor..."
-        if docker manifest inspect "$harbor_image" >/dev/null 2>&1; then
-          echo "✓ Image $harbor_image already exists in Harbor, skipping..."
-          continue
-        fi
-        
-        # Descargar imagen de Docker Hub
-        echo "Pulling $image from Docker Hub..."
-        if docker pull "$image"; then
-          echo "✓ Successfully pulled $image"
-          
-          # Etiquetar para Harbor
-          echo "Tagging $image as $harbor_image"
-          docker tag "$image" "$harbor_image"
-          
-          # Subir a Harbor
-          echo "Pushing $harbor_image to Harbor..."
-          if docker push "$harbor_image"; then
-            echo "✓ Successfully pushed $harbor_image to Harbor"
-          else
-            echo "✗ Failed to push $harbor_image to Harbor"
-          fi
-          
-          # Limpiar imagen local para ahorrar espacio
-          docker rmi "$image" "$harbor_image" || true
-        else
-          echo "✗ Failed to pull $image from Docker Hub"
-        fi
-        
-        echo "---"
-      done
-  after_script:
-    - docker logout $HARBOR_REGISTRY || true
-    - docker system prune -f || true
-  rules:
-    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_COMMIT_BRANCH == "main"
-      when: manual
-    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_COMMIT_BRANCH == "develop"  
-      when: manual
-    - if: $ENABLE_CACHE_IMAGES == "true" && $CI_MERGE_REQUEST_ID
-      when: manual
-    - when: never  # ← Oculta completamente si la variable no está definida
-  

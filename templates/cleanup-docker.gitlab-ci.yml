@@ -1,0 +1,44 @@
+# ---------------------------------------------
+# Job para limpieza de recursos Docker
+# ---------------------------------------------
+cleanup:docker:
+  stage: post-deploy
+  image: ${DOCKER_IMAGE}
+  needs:
+    - job: deploy-qa
+      artifacts: false
+  parallel:
+    matrix:
+      - TARGET: ["runner", "server"]
+  before_script:
+    - |
+      if [ "$TARGET" == "server" ]; then
+        apk add --no-cache openssh-client sshpass
+        if [ -z "$SSH_PASSWORD_QA" ]; then
+          echo "ERROR: SSH_PASSWORD_QA variable is not set"
+          exit 1
+        fi
+      fi
+  script:
+    - |
+      if [ "$TARGET" == "runner" ]; then
+        echo "Cleaning up local Docker resources..."
+        docker image prune -a --force
+        docker container prune --force
+        docker volume prune --force
+        docker system df
+      else
+        echo "Cleaning up remote Docker resources..."
+        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
+          docker image prune -a --force &&
+          docker container prune --force &&
+          docker volume prune --force &&
+          docker system df
+        "
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      when: manual
+    - if: $CI_COMMIT_BRANCH == "develop"
+      when: manual
+    # NO en merge requests - solo en ramas principales
