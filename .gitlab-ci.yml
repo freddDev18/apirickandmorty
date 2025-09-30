@@ -375,6 +375,9 @@ stop_production:
       when: manual
     # NO en merge requests - solo en ramas principales
 
+# -------------------------------------------------------------
+# Jobs de pruebas
+# -------------------------------------------------------------
 e2e-tests:
   stage: test
   services:
