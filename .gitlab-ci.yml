@@ -111,10 +111,19 @@ install-dependencies:
 
 lint:
   stage: test
+  before_script:
+    - apk add --no-cache git
+    - npm config set cache .npm --global
+    # Si no existe node_modules o falta eslint, instalar dependencias
+    - |
+      if [ ! -d node_modules ] || [ ! -x node_modules/.bin/eslint ]; then
+        echo "node_modules missing or eslint absent — running npm ci"
+        npm ci --no-audit --prefer-offline
+      else
+        echo "node_modules present, skipping npm ci"
+      fi
   script:
     - npm run lint
-  dependencies:
-    - install-dependencies
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "develop"
