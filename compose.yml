@@ -11,6 +11,9 @@ services:
     labels:
       - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-http.rule=Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}`)||Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}.patronato.unam.mx`)"
       - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-http.entrypoints=web"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-https.rule=Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}`) || Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}.patronato.unam.mx`)"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-https.entrypoints=websecure"
+      - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-https.tls.certresolver=myresolver"
     env_file:
       - .env
     volumes:
