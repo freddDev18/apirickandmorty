@@ -314,6 +314,8 @@ delivery-production:
     - cp "$ENV_FILE_PROD" .env
     - echo "✓ .env file created successfully"
   script:
+    - echo "Logging into Harbor registry..."
+    - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
     - echo "Deploying to Production environment..."
     - echo "Creating remote directory structure..."
     - |
@@ -365,6 +367,9 @@ stop_production:
     - *check_vars_delivery_template
     - apk add --no-cache openssh-client sshpass
   script:
+    - echo "Logging into Harbor registry..."
+    - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
+    - echo "Stopping production deployment..."
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD "
         cd $REMOTE_PATH &&
