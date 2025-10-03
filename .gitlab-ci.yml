@@ -341,7 +341,7 @@ delivery-production:
         docker compose ps
       "
   needs:
-    - job: deploy-qa
+    - job: build-qa
       artifacts: true
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
