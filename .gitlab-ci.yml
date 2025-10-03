@@ -175,6 +175,10 @@ build-app:
   after_script:
     - docker logout $HARBOR_REGISTRY || true
     - docker system prune -f || true
+  artifacts:
+    paths:
+      - compose.yml
+    expire_in: 7 days
   dependencies:
     - e2e-tests
     - lint
@@ -298,6 +302,8 @@ stop_qa:
 delivery-production:
   stage: delivery
   image: ${ALPINE_IMAGE}
+  variables:
+    GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
   environment:
     name: production
     url: http://${HARBOR_PROJECT}-${IMAGE_NAME}.${SSH_HOST_PROD}
@@ -336,7 +342,7 @@ delivery-production:
       "
   needs:
     - job: deploy-qa
-      artifacts: false 
+      artifacts: true
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
       when: manual  # Deploy manual en develop
