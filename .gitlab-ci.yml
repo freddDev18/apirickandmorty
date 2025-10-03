@@ -208,6 +208,8 @@ build-app:
 deploy-qa:
   stage: deploy
   image: ${ALPINE_IMAGE}
+  variables:
+    GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
   environment:
     name: qa
     url: http://${HARBOR_PROJECT}-${IMAGE_NAME}.${SSH_HOST_QA}
@@ -237,7 +239,7 @@ deploy-qa:
         export IMAGE_TAG='$IMAGE_TAG' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
-
+        echo 'Logging into Harbor registry...' &&
         echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
         docker compose pull &&
