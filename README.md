@@ -98,7 +98,7 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
 -->
 
 ## Producción Continuos Delivery (CD)
-El proyecto está configurado para un despliegue continuo (CD) utilizando GitLab CI/CD. A continuación, se describen los pasos para configurar y utilizar esta funcionalidad:
+El proyecto está configurado para entrega continua (Continuous Delivery) utilizando GitLab CI/CD. A continuación, se describen los pasos para configurar y utilizar esta funcionalidad:
 
   1. Configura las variables de entorno en GitLab:
      - Accede al proyecto en GitLab y ve a `Settings` > `CI/CD` > `Variables` y agrega las siguientes variables como protegidas (protected) y enmascaradas (masked):
