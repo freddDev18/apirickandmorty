@@ -220,10 +220,10 @@ deploy-qa:
     - echo "Creating remote directory structure..."
     - |
       sshpass -p "$SSH_PASSWORD_QA" ssh -tt -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA \
-        "echo '$SSH_PASSWORD_QA' | sudo -S mkdir -p $REMOTE_PATH && \
-        echo '$SSH_PASSWORD_QA' | sudo -S chown $SSH_USER_QA:$SSH_USER_QA $REMOTE_PATH"
+        "echo '$SSH_PASSWORD_QA' | mkdir -p $REMOTE_PATH && \
+        echo '$SSH_PASSWORD_QA' | chown $SSH_USER_QA:$SSH_USER_QA $REMOTE_PATH"
   script:
-    - echo "Deploying to QA environment..."    
+    - echo "Deploying to QA environment..."
     - echo "Copying deployment files..."
     - |
       sshpass -p "$SSH_PASSWORD_QA" rsync -avz --timeout=60 \
@@ -238,7 +238,6 @@ deploy-qa:
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
-        echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose pull &&
         docker compose up -d --build --remove-orphans &&
         docker compose ps
@@ -313,22 +312,18 @@ delivery-production:
     - *check_vars_delivery_template
     - cp "$ENV_FILE_PROD" .env
     - echo "✓ .env file created successfully"
-  script:
-    - echo "Logging into Harbor registry..."
-    - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
-    - echo "Deploying to Production environment..."
     - echo "Creating remote directory structure..."
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -tt -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD \
-        "echo '$SSH_PASSWORD_PROD' | sudo -S mkdir -p $REMOTE_PATH && \
-         echo '$SSH_PASSWORD_PROD' | sudo -S chown $SSH_USER_PROD:$SSH_USER_PROD $REMOTE_PATH"
-    
+        "echo '$SSH_PASSWORD_PROD' | mkdir -p $REMOTE_PATH && \
+         echo '$SSH_PASSWORD_PROD' | chown $SSH_USER_PROD:$SSH_USER_PROD $REMOTE_PATH"
+  script:
+    - echo "Delivering to Production environment..."
     - echo "Copying deployment files..."
     - |
       sshpass -p "$SSH_PASSWORD_PROD" rsync -avz --timeout=60 \
         -e "ssh -p $SSH_PORT_PROD $SSH_OPTIONS" \
         compose.yml .env $SSH_USER_PROD@$SSH_HOST_PROD:$REMOTE_PATH/
-    
     - echo "Executing delivery..."
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD "
@@ -338,6 +333,8 @@ delivery-production:
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo 'Deploying image: ${FULL_IMAGE_NAME}:${IMAGE_TAG}' &&
+        echo 'Logging into Harbor registry...' &&
+        echo '$HARBOR_PASSWORD' | docker login -u '$HARBOR_USERNAME' --password-stdin $HARBOR_REGISTRY &&
         docker compose pull &&
         docker compose up -d --build --remove-orphans &&
         docker compose ps
@@ -367,8 +364,6 @@ stop_production:
     - *check_vars_delivery_template
     - apk add --no-cache openssh-client sshpass
   script:
-    - echo "Logging into Harbor registry..."
-    - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin $HARBOR_REGISTRY
     - echo "Stopping production deployment..."
     - |
       sshpass -p "$SSH_PASSWORD_PROD" ssh -p $SSH_PORT_PROD $SSH_OPTIONS $SSH_USER_PROD@$SSH_HOST_PROD "
