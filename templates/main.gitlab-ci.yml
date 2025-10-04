@@ -200,6 +200,8 @@ build-app:
 deploy-qa:
   stage: deploy
   image: ${ALPINE_IMAGE}
+  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
+  cache: []
   variables:
     GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
   environment:
@@ -248,6 +250,8 @@ deploy-qa:
 stop_qa:
   stage: deploy
   image: ${ALPINE_IMAGE}
+  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
+  cache: []
   variables:
     GIT_STRATEGY: "none"
   environment:
@@ -300,6 +304,8 @@ stop_qa:
 delivery-production:
   stage: delivery
   image: ${ALPINE_IMAGE}
+  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
+  cache: []
   variables:
     GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
   environment:
@@ -353,6 +359,8 @@ delivery-production:
 stop_production:
   stage: delivery
   image: ${ALPINE_IMAGE}
+  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
+  cache: []
   variables:
     GIT_STRATEGY: "none"
   environment:
