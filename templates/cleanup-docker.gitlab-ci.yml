@@ -4,8 +4,10 @@
 cleanup:docker:
   stage: post-deploy
   image: ${DOCKER_IMAGE}
+  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
+  cache: []
   variables:
-    GIT_STRATEGY: "none"
+    GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
   needs:
     - job: deploy-qa
       artifacts: false
