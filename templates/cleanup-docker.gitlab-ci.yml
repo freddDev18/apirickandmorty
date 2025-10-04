@@ -4,6 +4,8 @@
 cleanup:docker:
   stage: post-deploy
   image: ${DOCKER_IMAGE}
+  variables:
+    GIT_STRATEGY: "none"
   needs:
     - job: deploy-qa
       artifacts: false
