@@ -167,7 +167,7 @@ build-app:
     - |
       # Solo limpiar en caso de éxito del job (evita borrar si falló el push)
       if [ "${CI_JOB_STATUS:-}" = "success" ]; then
-        KEEP=3
+        KEEP=${HARBOR_KEEP_TAGS:-3}
         echo "Cleaning Harbor artifacts for ${HARBOR_PROJECT}/${IMAGE_NAME}, keeping ${KEEP} most recent..."
         PAGE=1
         PAGE_SIZE=100
