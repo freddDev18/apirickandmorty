@@ -19,6 +19,7 @@ variables:
   IMAGE_NAME: be
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   FULL_IMAGE_NAME: ${HARBOR_REGISTRY}/${HARBOR_PROJECT}/${IMAGE_NAME}
+  HARBOR_KEEP_TAGS: "3"    # <-- conservar 3 imágenes (incluyendo la actual)
   
   # Usar Harbor como proxy para imágenes públicas
   NODE_IMAGE: ${HARBOR_REGISTRY}/${HARBOR_IMAGES_PUBLIC}/node:${NODE_VERSION}-alpine
@@ -163,6 +164,48 @@ build-app:
     - docker push ${FULL_IMAGE_NAME}:${IMAGE_TAG}
     - docker push ${FULL_IMAGE_NAME}:latest
   after_script:
+    - |
+      # Solo limpiar en caso de éxito del job (evita borrar si falló el push)
+      if [ "${CI_JOB_STATUS:-}" = "success" ]; then
+        KEEP=3
+        echo "Cleaning Harbor artifacts for ${HARBOR_PROJECT}/${IMAGE_NAME}, keeping ${KEEP} most recent..."
+        PAGE=1
+        PAGE_SIZE=100
+        # Recolectar todos los artifacts con paginado simple
+        ARTIFACTS_ALL=""
+        while : ; do
+          PAGE_JSON=$(curl -s -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" "https://$HARBOR_REGISTRY/api/v2.0/projects/$HARBOR_PROJECT/repositories/$IMAGE_NAME/artifacts?page=$PAGE&page_size=$PAGE_SIZE")
+          COUNT=$(echo "$PAGE_JSON" | jq 'length')
+          if [ "$COUNT" -eq 0 ]; then
+            break
+          fi
+          ARTIFACTS_ALL="$(printf '%s\n%s' "$ARTIFACTS_ALL" "$PAGE_JSON")"
+          if [ "$COUNT" -lt "$PAGE_SIZE" ]; then
+            break
+          fi
+          PAGE=$((PAGE+1))
+        done
+        TOTAL=$(echo "$ARTIFACTS_ALL" | jq -s 'add | length')
+        if [ "$TOTAL" -le "$KEEP" ] || [ "$TOTAL" -eq 0 ]; then
+          echo "No artifacts to delete (total=$TOTAL, keep=$KEEP)"
+        else
+          TO_DELETE_COUNT=$((TOTAL - KEEP))
+          echo "Found $TOTAL artifacts, will delete $TO_DELETE_COUNT oldest artifacts"
+          echo "$ARTIFACTS_ALL" | jq -s 'add | .[] | "\(.push_time) \(.digest)"' | sort | head -n $TO_DELETE_COUNT | awk '{print $2}' | while read -r DIGEST; do
+            if [ -n "$DIGEST" ]; then
+              echo "Deleting artifact digest: $DIGEST"
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "$HARBOR_USERNAME:$HARBOR_PASSWORD" -X DELETE "https://$HARBOR_REGISTRY/api/v2.0/projects/$HARBOR_PROJECT/repositories/$IMAGE_NAME/artifacts/$DIGEST")
+              if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+                echo "Deleted $DIGEST (HTTP $HTTP_CODE)"
+              else
+                echo "Failed to delete $DIGEST (HTTP $HTTP_CODE) — continue"
+              fi
+            fi
+          done
+        fi
+      else
+        echo "Skipping Harbor cleanup because job did not finish successfully (CI_JOB_STATUS=${CI_JOB_STATUS:-})"
+      fi
     - docker logout $HARBOR_REGISTRY || true
     - docker system prune -f || true
   artifacts:
