@@ -17,6 +17,7 @@ cache-base-images:
       mcr.microsoft.com/mssql/server:${MSSQLSERVER_VERSION}-latest
       atmoz/sftp
       nginx:alpine
+      postgres:12.22
   before_script:
     - apk add --no-cache curl jq
     - |
