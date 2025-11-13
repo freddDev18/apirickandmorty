@@ -18,7 +18,7 @@ services:
       - .env
     volumes:
       - app_logs:/opt/app/logs
-    restart: on-failure:3
+    restart: unless-stopped
     networks:
       - proxy-net
     environment:
@@ -27,7 +27,7 @@ services:
       - db
   db:
     image: mysql:8
-    restart: on-failure:5
+    restart: unless-stopped
     environment:
       - MYSQL_DATABASE=mysqldb
       - MYSQL_USER=admin
