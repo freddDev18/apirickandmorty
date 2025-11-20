@@ -1,7 +1,7 @@
 include:
   - local: "templates/main.gitlab-ci.yml"
 # Descomentar si se desea limpieza de Docker y cacheo de imágenes base
-  # - local: "templates/cleanup-docker.gitlab-ci.yml"
+  - local: "templates/cleanup-docker.gitlab-ci.yml"
   # - local: "templates/cache-base-images.gitlab-ci.yml"
 # Seguridad (deshabilitado por ahora, activar si se requiere)
   # - template: Security/SAST.gitlab-ci.yml
