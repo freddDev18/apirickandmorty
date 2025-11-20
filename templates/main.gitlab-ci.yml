@@ -470,10 +470,10 @@ log-prod-short:
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
         echo '=== Container Status ===' &&
-        docker compose ps &&
+        docker compose ps api &&
         echo '' &&
         echo '=== Last 100 lines of logs ===' &&
-        docker compose logs --tail=100
+        docker compose logs api --tail=100
       "
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
@@ -500,8 +500,8 @@ log-prod-full:
         export IMAGE_TAG='$IMAGE_TAG' &&
         export IMAGE_NAME='$IMAGE_NAME' &&
         export CI_PROJECT_NAME='$CI_PROJECT_NAME' &&
-        docker compose logs --no-color
-      " > logs/production-${CI_COMMIT_SHORT_SHA}.log
+        docker compose logs api --no-color
+      " > logs/api-production-${CI_COMMIT_SHORT_SHA}.log
     - echo "Logs saved to artifact"
   artifacts:
     paths:
