@@ -456,6 +456,7 @@ log-prod-short:
   cache: []
   variables:
     GIT_STRATEGY: "none"
+  needs: []
   before_script:
     - apk add --no-cache openssh-client sshpass
     - *check_vars_for_logs
@@ -485,6 +486,7 @@ log-prod-full:
   cache: []
   variables:
     GIT_STRATEGY: "none"
+  needs: []
   before_script:
     - apk add --no-cache openssh-client sshpass
     - *check_vars_for_logs
