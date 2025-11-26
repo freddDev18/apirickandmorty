@@ -31,7 +31,12 @@ cleanup:docker:
         docker system df
         docker image prune -a --force
         docker container prune --force
-        docker volume prune --force
+        echo -e "\n🗑️  Eliminando volúmenes huérfanos..."
+        VOLUMES_BEFORE=$(docker volume ls -q | wc -l)
+        docker volume prune --force || true
+        VOLUMES_AFTER=$(docker volume ls -q | wc -l)
+        VOLUMES_REMOVED=$((VOLUMES_BEFORE - VOLUMES_AFTER))
+        echo "   ✅ Volúmenes eliminados: $VOLUMES_REMOVED"
         docker builder prune -a --force
         docker network prune --force
         echo -e "\n📊 Estado DESPUÉS de la limpieza:"
