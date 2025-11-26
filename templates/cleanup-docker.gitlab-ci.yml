@@ -8,9 +8,6 @@ cleanup:docker:
   cache: []
   variables:
     GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
-  needs:
-    - job: deploy-qa
-      artifacts: false
   parallel:
     matrix:
       - TARGET: ["runner", "server"]
