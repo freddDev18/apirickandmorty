@@ -27,19 +27,29 @@ cleanup:docker:
     - |
       if [ "$TARGET" == "runner" ]; then        
         echo "Cleaning up local Docker resources..."
+        echo -e "\n📊 Estado ANTES de la limpieza:"
         docker system df
         docker image prune -a --force
         docker container prune --force
         docker volume prune --force
+        docker builder prune -a --force
+        docker network prune --force
+        echo -e "\n📊 Estado DESPUÉS de la limpieza:"
         docker system df
+        echo -e "\n✅ Limpieza local completada"
       else
         echo "Cleaning up remote Docker resources..."
         sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
+          echo -e '\n📊 Estado ANTES de la limpieza:' && 
           docker system df &&
           docker image prune -a --force &&
           docker container prune --force &&
           docker volume prune --force &&
+          docker builder prune -a --force &&
+          docker network prune --force &&|
+          echo -e '\n📊 Estado DESPUÉS de la limpieza:' && 
           docker system df
+          echo -e '\n✅ Limpieza remota completada'
         "
       fi
   rules:
