@@ -4,10 +4,9 @@
 cleanup:docker:
   stage: post-deploy
   image: ${DOCKER_IMAGE}
-  # <-- Anular cache global para evitar restaurar/archivar node_modules/.npm -->
   cache: []
   variables:
-    GIT_STRATEGY: "none"   # evitar intento de clonar el repo (evita 403)
+    GIT_STRATEGY: "none"
   needs: []
   parallel:
     matrix:
@@ -16,48 +15,42 @@ cleanup:docker:
     - |
       if [ "$TARGET" == "server" ]; then
         apk add --no-cache openssh-client sshpass
-        if [ -z "$SSH_PASSWORD_QA" ]; then
-          echo "ERROR: SSH_PASSWORD_QA variable is not set"
-          exit 1
-        fi
+        [ -z "$SSH_PASSWORD_QA" ] && echo "ERROR: SSH_PASSWORD_QA not set" && exit 1
       fi
   script:
     - |
-      if [ "$TARGET" == "runner" ]; then        
-        echo "Cleaning up local Docker resources..."
-        echo -e "\n📊 Estado ANTES de la limpieza:"
+      if [ "$TARGET" == "runner" ]; then
+        echo "🧹 Limpieza LOCAL"
+        echo "📊 Antes:"
         docker system df
-        docker image prune -a --force
-        docker container prune --force
-        echo -e "\n🗑️  Eliminando volúmenes huérfanos..."
-        VOLUMES_BEFORE=$(docker volume ls -q | wc -l)
-        docker volume prune --force || true
-        VOLUMES_AFTER=$(docker volume ls -q | wc -l)
-        VOLUMES_REMOVED=$((VOLUMES_BEFORE - VOLUMES_AFTER))
-        echo "   ✅ Volúmenes eliminados: $VOLUMES_REMOVED"
-        docker builder prune -a --force
-        docker network prune --force
-        echo -e "\n📊 Estado DESPUÉS de la limpieza:"
+        
+        echo -e "\n🗑️  Limpiando..."
+        docker container prune -f
+        docker volume prune -f
+        docker image prune -a -f
+        docker network prune -fs
+        docker builder prune -a -f
+        docker volume prune -f  # Segunda pasada
+        
+        echo -e "\n📊 Después:"
         docker system df
-        echo -e "\n✅ Limpieza local completada"
+        echo "✅ Completado"
       else
-        echo "Cleaning up remote Docker resources..."
-        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA "
-          echo -e '\n📊 Estado ANTES de la limpieza:' && 
-          docker system df &&
-          docker image prune -a --force &&
-          docker container prune --force &&
-          docker volume prune --force &&
-          docker builder prune -a --force &&
-          docker network prune --force &&|
-          echo -e '\n📊 Estado DESPUÉS de la limpieza:' && 
-          docker system df
-          echo -e '\n✅ Limpieza remota completada'
-        "
+        echo "🧹 Limpieza REMOTA"
+        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS \
+          $SSH_USER_QA@$SSH_HOST_QA \
+          "docker system df && \
+           docker container prune -f && \
+           docker volume prune -f && \
+           docker image prune -a -f && \
+           docker network prune -f && \
+           docker builder prune -a -f && \
+           docker volume prune -f && \
+           docker system df && \
+           echo '✅ Completado'"
       fi
   rules:
-    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"
       when: manual
-    - if: $CI_COMMIT_BRANCH == "develop"
-      when: manual
-    # NO en merge requests - solo en ramas principales
+      allow_failure: true
+  timeout: 15m
