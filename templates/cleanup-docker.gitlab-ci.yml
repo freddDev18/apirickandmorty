@@ -50,17 +50,19 @@ cleanup:docker:
         echo "✅ Completado"
       else
         echo "🧹 Limpieza REMOTA"
-        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS \
-          $SSH_USER_QA@$SSH_HOST_QA \
-          "docker system df && \
-           docker container prune -f && \
-           docker volume prune -f && \
-           docker image prune -a -f && \
-           docker network prune -f && \
-           docker builder prune -a -f && \
-           docker volume prune -f && \
-           docker system df && \
-           echo '✅ Completado'"
+        sshpass -p "$SSH_PASSWORD_QA" ssh -p $SSH_PORT_QA $SSH_OPTIONS $SSH_USER_QA@$SSH_HOST_QA \
+            "docker system df || true; \
+            docker ps -a --filter 'status=exited' --filter 'status=dead' -q | xargs -r docker rm -v || true; \
+            docker container prune -f || true; docker image prune -a -f || true; docker network prune -f || true; docker builder prune -a -f || true; \
+            docker volume ls -qf dangling=true | xargs -r docker volume rm -f || true; \
+            docker volume ls -q | while read -r vol; do \
+              if [ -z \"\$(docker ps -a --filter 'volume=\$vol' -q)\" ]; then \
+                echo \"  Removing unused volume: \$vol\"; docker volume rm -f \"\$vol\" || echo \"    ⚠ Could not remove \$vol\"; \
+              else \
+                echo \"  In use, skipping: \$vol\"; \
+              fi; \
+            done; \
+            docker system df || true; echo '✅ Completado'"
       fi
   rules:
     - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"
