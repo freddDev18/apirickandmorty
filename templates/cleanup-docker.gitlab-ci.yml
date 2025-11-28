@@ -19,35 +19,34 @@ cleanup:docker:
       fi
   script:
     - |
-      if [ "$TARGET" == "runner" ]; then
-        echo "🧹 Limpieza LOCAL"
-        echo "📊 Antes:"
-        docker system df
-        
-        echo -e "\n🗑️  Limpiando..."
-        docker container prune -f
-        docker volume prune -f
-        docker builder prune -a -f
-        docker image prune -a -f
-        docker network prune -f
-        docker volume prune -f  # Segunda pasada para asegurar limpieza
-        # 7. Optional: Remove volumes older than 1 days that aren't in use
-        echo "Removiendo volúmenes antiguos (>7 días)..."
-        docker volume ls -q | while read vol; do
-          if [ -z "$(docker ps -a --filter volume=$vol -q)" ]; then
-            CREATED=$(docker volume inspect --format '{{ .CreatedAt }}' "$vol" 2>/dev/null || echo "")
-            if [ -n "$CREATED" ]; then
-              AGE_SECONDS=$(( $(date +%s) - $(date -d "$CREATED" +%s 2>/dev/null || echo $(date +%s)) ))
-              if [ $AGE_SECONDS -gt 86400 ]; then  # 1 days
-                echo "Removiendo volumen antiguo: $vol (creado $CREATED)"
-                docker volume rm "$vol" 2>/dev/null || true
-              fi
-            fi
+      if [ "$TARGET" = "runner" ]; then
+        echo "🧹 Limpieza LOCAL - estado inicial"
+        docker system df || true
+
+        echo -e "\n1) Eliminar contenedores 'exited' y 'dead' (libera volúmenes anonimos)"
+        docker ps -a --filter "status=exited" --filter "status=dead" -q | xargs -r docker rm -v || true
+
+        echo -e "\n2) Prune general (containers/images/networks/build cache)"
+        docker container prune -f || true
+        docker image prune -a -f || true
+        docker network prune -f || true
+        docker builder prune -a -f || true
+
+        echo -e "\n3) Eliminar volúmenes 'dangling' detectados por Docker"
+        docker volume ls -qf dangling=true | xargs -r docker volume rm -f || true
+
+        echo -e "\n4) Intentar eliminar volúmenes no referenciados por contenedores (seguro)"
+        docker volume ls -q | while read -r vol; do
+          if [ -z "$(docker ps -a --filter "volume=$vol" -q)" ]; then
+            echo "  Removing unused volume: $vol"
+            docker volume rm -f "$vol" || echo "    ⚠ Could not remove $vol"
+          else
+            echo "  In use, skipping: $vol"
           fi
         done
-        
-        echo -e "\n📊 Después:"
-        docker system df
+
+        echo -e "\nEstado final:"
+        docker system df || true
         echo "✅ Completado"
       else
         echo "🧹 Limpieza REMOTA"
