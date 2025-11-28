@@ -95,6 +95,23 @@ default:
   - git submodule sync --recursive
   - git submodule update --init --recursive
 
+.cleanup_docker: &cleanup_docker
+  - 'if command -v docker >/dev/null 2>&1; then'
+  - '  echo "CI: cleanup - removing exited containers (and their anon volumes)";'
+  - '  docker ps -a --filter "status=exited" --filter "status=dead" -q | xargs -r docker rm -v || true;'
+  - '  echo "CI: cleanup - remove dangling volumes";'
+  - '  docker volume ls -qf dangling=true | xargs -r docker volume rm -f || true;'
+  - '  echo "CI: cleanup - remove any unused volumes (explicit)";'
+  - '  docker volume ls -q | while read -r vol; do'
+  - '    if [ -z "$(docker ps -a --filter "volume=$vol" -q)" ]; then'
+  - '      echo "  Removing unused volume: $vol";'
+  - '      docker volume rm -f "$vol" || true;'
+  - '    else'
+  - '      echo "  In use, skipping: $vol";'
+  - '    fi;'
+  - '  done;'
+  - '  docker system df || true;'
+  - 'fi'
 install-dependencies:
   stage: install
   before_script:
@@ -167,6 +184,7 @@ build-app:
     - docker push ${FULL_IMAGE_NAME}:${IMAGE_TAG}
     - docker push ${FULL_IMAGE_NAME}:latest
   after_script:
+    - *cleanup_docker
     - |
       # Solo limpiar en caso de éxito del job (evita borrar si falló el push)
       if [ "${CI_JOB_STATUS:-}" = "success" ]; then
