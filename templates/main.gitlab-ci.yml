@@ -184,7 +184,6 @@ build-app:
     - docker push ${FULL_IMAGE_NAME}:${IMAGE_TAG}
     - docker push ${FULL_IMAGE_NAME}:latest
   after_script:
-    - *cleanup_docker
     - |
       # Solo limpiar en caso de éxito del job (evita borrar si falló el push)
       if [ "${CI_JOB_STATUS:-}" = "success" ]; then
@@ -228,7 +227,7 @@ build-app:
         echo "Skipping Harbor cleanup because job did not finish successfully (CI_JOB_STATUS=${CI_JOB_STATUS:-})"
       fi
     - docker logout $HARBOR_REGISTRY || true
-    - docker system prune -f || true
+    - *cleanup_docker
   artifacts:
     paths:
       - compose.yml
