@@ -1,6 +1,7 @@
 const { Router } = require('express');
 
 const usersRouter = require('./users.router.js');
+const timezoneRouter = require('./timezon.router.js');
 
 function routerApi(app) {
   const router = Router();
@@ -9,6 +10,7 @@ function routerApi(app) {
 
   router.get('/', health);
   router.use('/users', usersRouter);
+  router.use('/dates', timezoneRouter);
 }
 
 module.exports = routerApi;

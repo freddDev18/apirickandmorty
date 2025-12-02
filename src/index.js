@@ -1,6 +1,6 @@
 const createApp = require('./app.js');
 const { appConfig } = require('./common/config.js');
-const { gracefulShutdown } = require('./common/utils.js');
+const gracefulShutdown = require('./common/utils.js');
 
 const app = createApp();
 
