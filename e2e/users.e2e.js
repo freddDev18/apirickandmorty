@@ -1,7 +1,7 @@
 import { expect } from 'vitest';
-import getUser from '../queries/user.queries.js';
-import { api } from '../test/setup.js';
-import fixtures from '../utils/fixtures.js';
+import getUser from './queries/user.queries.js';
+import { api } from './test/setup.js';
+import fixtures from './utils/fixtures.js';
 
 describe('Pruebas a users', () => {
   const usersEndPoint = '/api/v1/users';

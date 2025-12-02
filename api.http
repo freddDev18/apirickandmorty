@@ -46,3 +46,27 @@ Content-Type: application/json
 @firstUserId = {{ getAll.response.body.data.$[0].id }}
 DELETE  {{baseUrl}}/api/v1/users/{{firstUserId}}
 
+### Crear un fecha con zona horaria
+POST {{baseUrl}}/api/v1/dates
+Content-Type: application/json
+
+[
+  {
+    "timeZone": "America/Los_Angeles",
+    "date": "2016-02-26T00:00:00-08:00"
+  },
+  {
+    "timeZone": "America/Mexico_City",
+    "date": "2016-02-26T12:15:00Z"
+  },
+  {
+    "timeZone": "America/New_York",
+    "date": "2016-02-26T00:00:00-05:00"
+  },
+  {
+    "timeZone": "Europe/London",
+    "date": "2016-02-26T00:00:00+00:00"
+  }
+]
+
+
