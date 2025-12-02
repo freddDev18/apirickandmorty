@@ -1,7 +1,7 @@
 const { UserSchema, USER_TABLE } = require('../models/User.model.js');
 const { StudentSchema, STUDENT_TABLE } = require('../models/Student.model.js');
 const { SubjectSchema, SUBJECT_TABLE } = require('../models/Subject.model.js');
-const { TimezoneSchema, TIMEZONE_TABLE } = require('../models/TimeZone.model.js');
+const { TimezoneSchema, TIMEZONE_TABLE } = require('../models/timezone.model.js');
 
 module.exports = {
   up: async (queryInterface) => {
