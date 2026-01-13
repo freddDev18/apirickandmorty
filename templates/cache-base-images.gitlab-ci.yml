@@ -106,5 +106,5 @@ cache-base-images:
       when: manual
     - if: $ENABLE_CACHE_IMAGES == "true" && $CI_MERGE_REQUEST_ID
       when: manual
-    - when: never  # ← Oculta completamente si la variable no está definida
+    # - when: never  # ← Oculta completamente si la variable no está definida
   
