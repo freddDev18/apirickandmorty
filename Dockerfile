@@ -9,9 +9,6 @@ ENV NODE_ENV=production
 
 WORKDIR /opt/app
 
-# Inicializar y actualizar submódulos de forma recursiva
-RUN git config --global --add safe.directory /opt/app && \
-    git submodule update --init --recursive
 # Descargar dependencias como un paso separado para aprovechar la caché de Docker.
 # Aprovechar un montaje de caché en /root/.npm para acelerar las compilaciones posteriores.
 # Aprovechar montajes bind a package.json y package-lock.json para evitar tener que copiarlos en

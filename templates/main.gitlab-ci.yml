@@ -138,6 +138,8 @@ lint:
 build-app:
   stage: build
   image: ${DOCKER_IMAGE}
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - apk add --no-cache curl jq
     - |    
