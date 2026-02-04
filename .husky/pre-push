@@ -2,4 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # Ejecuta pruebas antes de permitir el push
-npm run coverage
+npm run e2e
