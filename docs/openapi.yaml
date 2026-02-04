@@ -20,9 +20,9 @@ servers:
         default: v1
 tags:
   - name: users
-    description: Todo sobre usuarios fakers
+    description: Operaciones sobre usuarios fakers
   - name: dates
-    description: Operaciones con fechas y zonas horarias
+    description: Operaciones sobre fechas y zonas horarias
 paths:
   /users:
     get:
@@ -93,24 +93,6 @@ paths:
           $ref: '#/components/responses/ServerError.response'
         default:
           $ref: '#/components/responses/Default.response'
-  /dates:
-    post:
-      tags:
-        - dates
-      summary: Crea una nueva fecha
-      description: Agrega una nueva fecha
-      operationId: addDate
-      requestBody:
-        $ref: '#/components/requestBodies/CrearFecha'
-      responses:
-        '201':
-          $ref: '#/components/responses/CrearFecha.response'
-        '400':
-          $ref: '#/components/responses/BadRequest.response'
-        '422':
-          $ref: '#/components/responses/UnprocessableContent.response'
-        '500':
-          $ref: '#/components/responses/ServerError.response'
     patch:
       tags:
         - users
@@ -153,6 +135,24 @@ paths:
           $ref: '#/components/responses/UnprocessableContent.response'
         '500':
           $ref: '#/components/responses/ServerError.response'
+  /dates:
+    post:
+      tags:
+        - dates
+      summary: Crea una nueva fecha
+      description: Agrega una nueva fecha
+      operationId: addDate
+      requestBody:
+        $ref: '#/components/requestBodies/CrearFecha'
+      responses:
+        '201':
+          $ref: '#/components/responses/CrearFecha.response'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
     id.parameter:
@@ -176,21 +176,18 @@ components:
       minLength: 36
       maxLength: 36
       example: 663d5363-ea3b-43f5-be04-3e7ccef942cc
-    timeZone:
-      type: string
-      description: Zona horaria en formato IANA
-      example: America/New_York
-    CrearFecha:
+    Fecha:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/uuid'
         timeZone:
-          $ref: '#/components/schemas/timeZone'
+          type: string
+          description: Zona horaria en formato IANA
+          example: America/New_York
         date:
           type: string
           format: date-time
-      required:
-        - timeZone
-        - date
     Usuario:
       type: object
       required:
@@ -275,14 +272,22 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/CrearFecha'
+              allOf:
+              - $ref: '#/components/schemas/Fecha'
+              - type: object
+                properties:
+                  id:
+                    readOnly: true
+              required:
+                - timeZone
+                - date
           example:
             - timeZone: "America/Mexico_City"
               date: "2024-10-15T12:30:00-06:00"
             - timeZone: "Europe/London"
-              fecha: "2024-10-15T19:30:00+01:00"
+              date: "2024-10-15T19:30:00+01:00"
             - timeZone: "Asia/Tokyo"
-              fecha: "2024-10-16T03:30:00+09:00"
+              date: "2024-10-16T03:30:00+09:00"
       required: true
   responses:
     Usuario.response:
@@ -323,30 +328,23 @@ components:
               id:
                 $ref: '#/components/schemas/uuid'
     CrearFecha.response:
-      description: Fecha creada
+      description: Lista de fechas creadas
       content:
         application/json:
           schema:
             type: array
             items:
-              properties:
-                id:
-                  $ref: '#/components/schemas/uuid'
-                timeZone:
-                  $ref: '#/components/schemas/timeZone'
-                date:
-                  type: string
-                  format: date-time
+              $ref: '#/components/schemas/Fecha'
           example:
             - id: "8dbeb7e3-407d-46b5-9bbc-97562314bb49"
               timeZone: "America/Mexico_City"
-              fecha: "2024-10-15T18:30:00.000Z"
+              date: "2024-10-15T18:30:00.000Z"
             - id: "3ef98f4d-0e07-4793-bc53-543aa19d20ee"
               timeZone: "Europe/London"
-              fecha: "2024-10-15T18:30:00.000Z"
+              date: "2024-10-15T18:30:00.000Z"
             - id: "afcf5670-c33f-4b1a-9be6-6a4b3eb27246"
               timeZone: "Asia/Tokyo"
-              fecha: "2024-10-15T18:30:00.000Z"
+              date: "2024-10-15T18:30:00.000Z"
     BadRequest.response:
       description: La solicitud presenta una sintaxis de incorrecta
       content:
