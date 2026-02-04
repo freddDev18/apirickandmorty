@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Ejecuta pruebas antes de permitir el push
+npm run coverage
