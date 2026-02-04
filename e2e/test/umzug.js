@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const { Umzug, SequelizeStorage } = require('umzug');
 const sequelize = require('../../src/db/users/connections/sequelize.js');
+const { dbAppConfig } = require('../../src/common/config.js');
 
 const umzug = new Umzug({
   migrations: { glob: './src/db/users/seeders/*.js' },
@@ -13,7 +14,8 @@ const umzug = new Umzug({
 
 const upSeed = async () => {
   try {
-    await sequelize.sync({ force: true, match: /_test$/ }); // Crear tablas
+    const { dbName } = dbAppConfig;
+    await sequelize.sync({ force: true, match: new RegExp(`^${dbName}$`) }); // Crear tablas
     await umzug.up();
   } catch (error) {
     console.error(error);
@@ -21,7 +23,8 @@ const upSeed = async () => {
 };
 
 const downSeed = async () => {
-  await sequelize.drop();
+  const { dbName } = dbAppConfig;
+  await sequelize.drop({ match: new RegExp(`^${dbName}$`) }); // Eliminar tablas
 };
 
 module.exports = { upSeed, downSeed };

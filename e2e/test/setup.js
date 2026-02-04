@@ -7,6 +7,7 @@ import restHandlers from './handlers.js';
 
 const request = require('supertest');
 const createApp = require('../../src/app.js');
+const { appConfig } = require('../../src/common/config.js');
 const { upSeed, downSeed } = require('./umzug.js');
 
 export const server = setupServer(...restHandlers);
@@ -20,15 +21,15 @@ afterAll(() => server.close());
 afterEach(() => server.resetHandlers());
 
 beforeAll(async () => {
-  app = createApp();
-  localServer = app.listen(9000);
-  api = request(app);
   await upSeed();
+  app = createApp();
+  localServer = app.listen(appConfig.port);
+  api = request(app);
 });
 
 afterAll(async () => {
-  localServer.close();
   await downSeed();
+  localServer.close();
 });
 
 export { api };

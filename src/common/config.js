@@ -1,11 +1,7 @@
 const dotenv = require('dotenv');
 // Load the main .env file
 dotenv.config({ path: '.env' });
-
 const env = process.env.NODE_ENV || 'development';
-
-dotenv.config({ path: '.env' });
-
 // Load environment-specific .env file if it exists
 const envFile = `.env.${env}`;
 
@@ -18,7 +14,7 @@ const appConfig = {
   port: process.env.PORT || 3000,
 };
 
-const usersConfig = {
+const dbAppConfig = {
   dbHost: process.env.DB_HOST_APP,
   dbPort: process.env.DB_PORT_APP || 3306,
   dbName: process.env.DB_NAME_APP,
@@ -28,5 +24,5 @@ const usersConfig = {
 
 module.exports = {
   appConfig,
-  usersConfig,
+  dbAppConfig,
 };

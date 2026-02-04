@@ -1,10 +1,15 @@
-version: '3.8'
+networks:
+  shared-network:
+    name: devcontainer-shared-network
+    driver: bridge
 
 services:
   app:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
+    profiles:
+      - dev
     volumes:
       - ../..:/workspaces:cached
     # Overrides default command so things don't shut down after the process ends.
@@ -17,6 +22,10 @@ services:
       - db
   db:
     image: mysql:lts
+    profiles:
+      - dev
+    networks:
+      - shared-network
     environment:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
@@ -26,16 +35,17 @@ services:
       - .env
     ports:
       - "3306:3306"
+  # ========== E2E Services (solo con --profile e2e) ==========
   db-e2e:
     image: mysql:lts
+    profiles:
+      - e2e
+    networks:
+      - shared-network
     environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}_test
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
     env_file:
       - .env
-    ports:
-      - "3307:3306"
-  
-    

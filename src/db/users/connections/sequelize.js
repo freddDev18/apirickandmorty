@@ -1,9 +1,9 @@
 const { Sequelize } = require('sequelize');
-const { usersConfig, appConfig } = require('../../../common/config.js');
+const { dbAppConfig, appConfig } = require('../../../common/config.js');
 
 const options = {
-  host: usersConfig.dbHost,
-  port: usersConfig.dbPort,
+  host: dbAppConfig.dbHost,
+  port: dbAppConfig.dbPort,
   dialect: 'mysql',
   dialectOptions: {
     decimalNumbers: true, // Convierte automáticamente DECIMAL a números
@@ -17,10 +17,12 @@ const options = {
 };
 
 const sequelize = new Sequelize(
-  usersConfig.dbName,
-  usersConfig.dbUser,
-  usersConfig.dbPassword,
+  dbAppConfig.dbName,
+  dbAppConfig.dbUser,
+  dbAppConfig.dbPassword,
   options,
 );
+// eslint-disable-next-line no-console
+console.log(`Connecting to database at ${dbAppConfig.dbHost}:${dbAppConfig.dbPort}/${dbAppConfig.dbName}`);
 
 module.exports = sequelize;

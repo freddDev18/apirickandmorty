@@ -1,11 +1,11 @@
-const { appConfig, usersConfig } = require('../../../common/config.js');
+const { appConfig, dbAppConfig } = require('../../../common/config.js');
 
 const commonConfig = {
-  username: usersConfig.dbUser,
-  password: usersConfig.dbPassword,
-  database: usersConfig.dbName,
-  host: usersConfig.dbHost,
-  port: usersConfig.dbPort,
+  username: dbAppConfig.dbUser,
+  password: dbAppConfig.dbPassword,
+  database: dbAppConfig.dbName,
+  host: dbAppConfig.dbHost,
+  port: dbAppConfig.dbPort,
   dialect: 'mysql',
   logging: !appConfig.isProd,
 };
