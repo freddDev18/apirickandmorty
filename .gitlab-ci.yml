@@ -15,26 +15,23 @@ e2e-tests:
   services:
     - name: ${MYSQL_IMAGE}
       alias: db-e2e
+      variables:
+        MYSQL_ROOT_PASSWORD: mys3cretp4SS
+        MYSQL_DATABASE: mydatabase
+        MYSQL_USER: mydbuser
+        MYSQL_PASSWORD: mys3cretp4SS
   variables:
-    # Database config (para tests)
-    DB_HOST_TEST: db-e2e
-    DB_PORT_TEST: "3306"
-    DB_NAME_TEST: mysqldb_test
-    DB_USER_TEST: admin
-    DB_PASSWORD_TEST: qwerty123
-    # Database configuration for e2e tests
-    MYSQL_DATABASE: ${DB_NAME_TEST}
-    MYSQL_USER: ${DB_USER_TEST}
-    MYSQL_PASSWORD: ${DB_PASSWORD_TEST}
-    MYSQL_ROOT_PASSWORD: root
-    # Application environment variables
-    DB_HOST_APP: ${DB_HOST_TEST}
-    DB_PORT_APP: ${DB_PORT_TEST}
-    DB_NAME_APP: ${DB_NAME_TEST}
-    DB_USER_APP: ${DB_USER_TEST}
-    DB_PASSWORD_APP: ${DB_PASSWORD_TEST}
+    # Database
+    DB_HOST_APP: db-e2e
+    DB_PORT_APP: 3306
+    DB_NAME_APP: mydatabase
+    DB_USER_APP: mydbuser
+    DB_PASSWORD_APP: mys3cretp4SS
+
   before_script:
     - apk add --no-cache git
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
     - npm config set cache .npm --global
     # Si no existe node_modules o falta vitest, instalar (aprovecha cache)
     - |
@@ -44,6 +41,31 @@ e2e-tests:
       else
         echo "node_modules present, skipping npm ci"
       fi
+    # Función para esperar servicios
+    - |
+      wait_for_service() {
+        local service_name="$1"
+        local host="$2"
+        local port="$3"
+        shift 3
+        local check_cmd="$@"
+        
+        echo "Esperando $service_name en $host:$port..."
+        for i in $(seq 1 15); do
+          if $check_cmd >/dev/null 2>&1; then
+            echo "✓ $service_name está listo"
+            return 0
+          fi
+          echo "Esperando $service_name... intento $i/15"
+          sleep 2
+        done
+        echo "⚠ Timeout esperando $service_name"
+        return 1
+      }
+    # Espera inicial para reducir flakiness
+    - sleep 5
+    # Verificar servicios
+    - wait_for_service "MySQL" "$DB_HOST_APP" "$DB_PORT_APP" nc -z -w5 "$DB_HOST_APP" "$DB_PORT_APP"
   script:
     - npm run e2e:coverage
   artifacts:
