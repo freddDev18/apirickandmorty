@@ -188,6 +188,8 @@ components:
         date:
           type: string
           format: date-time
+          example: '2024-10-15T18:30:00.000Z'
+          description: Fecha en formato ISO 8601 en UTC
     Usuario:
       type: object
       required:
