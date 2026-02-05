@@ -268,7 +268,7 @@ components:
                   readOnly: true
       required: true
     CrearFecha:
-      description: Inserta un arreglo de objetos con campos `timeZone` (IANA) y `fecha` (ISO 8601)
+      description: Crea un colección de fechas con campos `timeZone` (IANA) y `fecha` (ISO 8601) y devuelve la colección de fechas con su identificador único.
       content:
         application/json:
           schema:
