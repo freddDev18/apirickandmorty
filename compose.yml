@@ -7,7 +7,7 @@ services:
     #   context: .
     #   dockerfile: Dockerfile
     # Eliminar command si el servicio no requiere base de datos
-    command: sh -c 'until nc -z db 3306; do echo "Waiting for MySQL..."; sleep 2; done && npm run db:reset && pm2-runtime start ecosystem.config.js'
+    command: sh -c 'until nc -z db 3306; do echo "Waiting for MySQL..."; sleep 2; done && npm run db:reset:ci && pm2-runtime start ecosystem.config.js'
     labels:
       - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-http.rule=Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}`)||Host(`${CI_PROJECT_NAME}-${IMAGE_NAME}.${HOST}.patronato.unam.mx`)"
       - "traefik.http.routers.${CI_PROJECT_NAME}-${IMAGE_NAME}-http.entrypoints=web"
