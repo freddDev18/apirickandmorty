@@ -60,7 +60,7 @@ Para desplegar la aplicación en producción utilizando Docker, sigue estos paso
   export IMAGE_NAME=be
   export HARBOR_PROJECT=${CI_PROJECT_NAME}
   export DOCKER_PATH="/opt/docker/${CI_PROJECT_NAME}"
-  export PAT=glpat-svH45ywyVqWE4kBg-85Y
+  export PAT=mi_token
   
   # Verificar configuración
   echo "Directorio de trabajo: $(pwd)"
