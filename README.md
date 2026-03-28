@@ -41,6 +41,3 @@ Los Dev Containers de Microsoft permiten desarrollar dentro de un contenedor Doc
 - **Iniciar aplicación**:
      - Si tu aplicación no inicia, abre una terminal en Visual Studio Code y ejecuta: `npm run dev`
      - La aplicación estará disponible en http://localhost:3000
-
-
-#
