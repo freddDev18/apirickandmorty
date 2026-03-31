@@ -159,6 +159,8 @@ paths:
         - Personajes
       summary: Obtener lista de personajes
       description: Retorna una lista paginada de todos los personajes de la serie.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Respuesta exitosa
@@ -179,7 +181,7 @@ paths:
       summary: Obtener el detalle de un personaje único
       description: Retorna toda la información de un solo personaje identificado por su ID.
       parameters:
-        - $ref: '#/components/parameters/id.idCharacter'
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Personaje encontrado exitosamente
@@ -231,6 +233,8 @@ paths:
         - Ubicaciones
       summary: Obtener lista de ubicaciones
       description: Retorna una lista paginada de todos los planetas, dimensiones y estaciones espaciales.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Respuesta exitosa
@@ -251,13 +255,7 @@ paths:
       summary: Obtener detalle de una ubicación única
       description: Retorna la información completa de una sola ubicación (planeta, dimensión o estación) identificado por su ID.
       parameters:
-        - name: id
-          in: path
-          description: ID numérico de la ubicación
-          required: true
-          schema:
-            type: integer
-            example: 3
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Ubicación encontrada
@@ -277,6 +275,8 @@ paths:
         - Episodios
       summary: Obtener lista de episodios
       description: Retorna una lista paginada de todos los episodios emitidos.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Listado de episodios obtenido con éxito.
@@ -297,13 +297,7 @@ paths:
       summary: Obtener detalle de un episodio único
       description: Retorna la información completa de un solo episodio identificado por su ID.
       parameters:
-        - name: id
-          in: path
-          description: ID numérico del episodio a consultar
-          required: true
-          schema:
-            type: integer
-            example: 1
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Episodio encontrado exitosamente
@@ -319,6 +313,14 @@ paths:
           $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
+    page.parameter:
+      name: page 
+      in: query
+      description: Número de pagina
+      required: true
+      schema:
+        type: integer
+        example: 1
     idCharacter.parameter: 
       name: id
       in: path
@@ -330,7 +332,7 @@ components:
     id.parameter:
       name: id
       in: path
-      description: ID del usuario
+      description: ID detalle del elemento
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
