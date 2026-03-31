@@ -153,8 +153,180 @@ paths:
           $ref: '#/components/responses/UnprocessableContent.response'
         '500':
           $ref: '#/components/responses/ServerError.response'
+  /character:
+    get:
+      tags:
+        - Personajes
+      summary: Obtener lista de personajes
+      description: Retorna una lista paginada de todos los personajes de la serie.
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterPaginatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /character/{id}:
+    get:
+      tags:
+        - Personajes
+      summary: Obtener el detalle de un personaje único
+      description: Retorna toda la información de un solo personaje identificado por su ID.
+      parameters:
+        - $ref: '#/components/parameters/id.idCharacter'
+      responses:
+        '200':
+          description: Personaje encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Character'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /character/{ids}:
+    get:
+      tags:
+        - Personajes
+      summary: Obtener una lista de detalles de personajes
+      description: Retorna una lista de objetos de informacion
+      parameters: 
+        - name: ids
+          in: path
+          description: Lista de IDs de personajes (ej. 1,2,3)
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+            example: [1, 2, 3]
+          # 'style: simple' y 'explode: false' es lo que permite el formato 1,2,3
+          style: simple
+          explode: false
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterPaginatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /location:
+    get:
+      tags:
+        - Ubicaciones
+      summary: Obtener lista de ubicaciones
+      description: Retorna una lista paginada de todos los planetas, dimensiones y estaciones espaciales.
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationPaginatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /location/{id}:
+    get:
+      tags:
+        - Ubicaciones
+      summary: Obtener detalle de una ubicación única
+      description: Retorna la información completa de una sola ubicación (planeta, dimensión o estación) identificado por su ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID numérico de la ubicación
+          required: true
+          schema:
+            type: integer
+            example: 3
+      responses:
+        '200':
+          description: Ubicación encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /episode:
+    get:
+      tags:
+        - Episodios
+      summary: Obtener lista de episodios
+      description: Retorna una lista paginada de todos los episodios emitidos.
+      responses:
+        '200':
+          description: Listado de episodios obtenido con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpisodePaginatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
+  /episode/{id}:
+    get:
+      tags:
+        - Episodios
+      summary: Obtener detalle de un episodio único
+      description: Retorna la información completa de un solo episodio identificado por su ID.
+      parameters:
+        - name: id
+          in: path
+          description: ID numérico del episodio a consultar
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Episodio encontrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+        '400':
+          $ref: '#/components/responses/BadRequest.response'
+        '422':
+          $ref: '#/components/responses/UnprocessableContent.response'
+        '500':
+          $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
+    idCharacter.parameter: 
+      name: id
+      in: path
+      description: ID del personaje
+      required: true
+      schema:
+        type: integer
+        example: 2
     id.parameter:
       name: id
       in: path
@@ -212,6 +384,217 @@ components:
           example: 'Hal-Finney@yahoo.com'
         isBlock:
           type: boolean
+    CharacterPaginatedResponse:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/PaginationInfo'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Character'
+    PaginationInfo:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Cantidad total de registros
+          example: 826
+        pages:
+          type: integer
+          description: Cantidad total de páginas
+          example: 42
+        next:
+          type: string
+          format: uri
+          nullable: true
+          description: URL de la siguiente página
+          example: "https://rickandmortyapi.com/api/character?page=2"
+        prev:
+          type: string
+          format: uri
+          nullable: true
+          description: URL de la página anterior
+          example: null
+    PaginationLocationInfo:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 126
+        pages:
+          type: integer
+          example: 7
+        next:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://rickandmortyapi.com/api/location?page=2"
+        prev:
+          type: string
+          format: uri
+          nullable: true
+          example: null
+    Character:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Rick Sanchez"
+        status:
+          type: string
+          enum: [Alive, Dead, unknown]
+          example: "Alive"
+        species:
+          type: string
+          example: "Human"
+        type:
+          type: string
+          example: ""
+        gender:
+          type: string
+          enum: [Female, Male, Genderless, unknown]
+          example: "Male"
+        origin:
+          $ref: '#/components/schemas/LocationRef'
+        location:
+          $ref: '#/components/schemas/LocationRef'
+        image:
+          type: string
+          format: uri
+          example: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
+        episode:
+          type: array
+          items:
+            type: string
+            format: uri
+          example: ["https://rickandmortyapi.com/api/episode/1"]
+        url:
+          type: string
+          format: uri
+          example: "https://rickandmortyapi.com/api/character/1"
+        created:
+          type: string
+          format: date-time
+          example: "2017-11-04T18:48:46.250Z"
+    LocationRef:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Earth (C-137)"
+        url:
+          type: string
+          format: uri
+          example: "https://rickandmortyapi.com/api/location/1"
+    LocationPaginatedResponse:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/PaginationLocationInfo'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Earth (C-137)"
+        type:
+          type: string
+          description: "El tipo de ubicación (Planet, Cluster, Space station, etc.)"
+          example: "Planet"
+        dimension:
+          type: string
+          description: "La dimensión a la que pertenece la ubicación"
+          example: "Dimension C-137"
+        residents:
+          type: array
+          description: "Lista de personajes que residen en esta ubicación"
+          items:
+            type: string
+            format: uri
+          example: ["https://rickandmortyapi.com/api/character/38"]
+        url:
+          type: string
+          format: uri
+          example: "https://rickandmortyapi.com/api/location/1"
+        created:
+          type: string
+          format: date-time
+          example: "2017-11-10T12:42:04.162Z"
+    EpisodePaginatedResponse:
+      type: object
+      properties:
+        info:
+          $ref: '#/components/schemas/PaginationEpisoeInfo'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Episode'
+    PaginationEpisoeInfo:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 51
+        pages:
+          type: integer
+          example: 3
+        next:
+          type: string
+          format: uri
+          nullable: true
+          example: "https://rickandmortyapi.com/api/episode?page=2"
+        prev:
+          type: string
+          format: uri
+          nullable: true
+          example: null
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID único del episodio.
+          example: 1
+        name:
+          type: string
+          description: Nombre del episodio.
+          example: "Pilot"
+        air_date:
+          type: string
+          description: Fecha en la que el episodio salió al aire.
+          example: "December 2, 2013"
+        episode:
+          type: string
+          description: Código del episodio (Temporada y Número).
+          example: "S01E01"
+        characters:
+          type: array
+          description: Lista de personajes que aparecen en este episodio.
+          items:
+            type: string
+            format: uri
+          example: ["https://rickandmortyapi.com/api/character/1"]
+        url:
+          type: string
+          format: uri
+          description: Enlace al endpoint del propio episodio.
+          example: "https://rickandmortyapi.com/api/episode/1"
+        created:
+          type: string
+          format: date-time
+          description: Fecha de creación del registro en la base de datos.
+          example: "2017-11-10T12:56:33.798Z"
     ErrorModel:
       type: object
       properties:
