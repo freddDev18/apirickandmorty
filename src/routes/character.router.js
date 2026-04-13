@@ -23,7 +23,6 @@ router.get(
     try {
       const character = new CharacterService();
       const { id } = req.params;
-      console.log(`id personaje: ${id}`);
 
       const dataCharacter = await character.getCharacterById(id);
       // console.log(JSON.stringify(dataCharacter));
@@ -40,7 +39,6 @@ router.get(
     try {
       const character = new CharacterService();
       const { ids } = req.params;
-      console.log(`ids personajes: ${ids}`);
 
       const dataCharacters = await character.getMultipleCharacterss(ids);
       // console.log(JSON.stringify(dataCharacter));

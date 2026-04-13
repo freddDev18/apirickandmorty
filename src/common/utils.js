@@ -16,14 +16,11 @@ const gracefulShutdown = (server) => {
 };
 
 const renameKeys = function renameKeysDeep(obj, keyMap) {
-  console.log(typeof obj);
   if (typeof obj !== 'object' || obj === null) {
-    console.log('1');
     return obj;
   }
 
   if (Array.isArray(obj)) {
-    console.log('2');
     return obj.map((item) => renameKeysDeep(item, keyMap));
   }
 
@@ -32,12 +29,10 @@ const renameKeys = function renameKeysDeep(obj, keyMap) {
   // eslint-disable-next-line no-restricted-syntax
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      console.log(`key ${key}`);
       const newKey = keyMap[key] || key;
       renamedObj[newKey] = renameKeysDeep(obj[key], keyMap);
     }
   }
-  console.log('3');
   return renamedObj;
 };
 

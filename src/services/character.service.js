@@ -47,8 +47,6 @@ class CharacterService {
       };
       */
 
-      console.log(tempDataCharacter);
-
       formatDataCaracter.push(tempDataCharacter);
     });
 
@@ -64,8 +62,6 @@ class CharacterService {
   }
 
   async getCharacterById(id) {
-    console.log('getCharacterById');
-
     const dataCharacterById = await rmProvider.fetch(`/character/${id}`);
 
     const ids = dataCharacterById.episode.map((url) => {
@@ -79,8 +75,6 @@ class CharacterService {
   }
 
   async getMultipleCharacters(ids) {
-    console.log('getMultipleCharacters');
-
     // ids puede ser un string "1,2,3" o un array [1,2,3]
     const formattedIds = Array.isArray(ids) ? ids.join(',') : ids;
     const dataMultipleCharacter = await rmProvider.fetch(`/character/${formattedIds}`);
