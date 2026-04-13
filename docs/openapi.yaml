@@ -168,7 +168,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CharacterPaginatedResponse'
-        '400':
+        '404':
           $ref: '#/components/responses/BadRequest.response'
         '422':
           $ref: '#/components/responses/UnprocessableContent.response'
@@ -204,16 +204,12 @@ paths:
       parameters: 
         - name: ids
           in: path
-          description: Lista de IDs de personajes (ej. 1,2,3)
+          description: Lista de IDs de personajes separados por coma (ej. 2,4,6)
           required: true
           schema:
-            type: array
-            items:
-              type: integer
-            example: [1, 2, 3]
-          # 'style: simple' y 'explode: false' es lo que permite el formato 1,2,3
-          style: simple
-          explode: false
+            type: string
+            pattern: '^\d+(,\d+)*$'  # <--- MAGIA: Solo acepta "1", "1,2", "1,2,3", etc.
+          example: '2,4,6'
       responses:
         '200':
           description: Respuesta exitosa
@@ -443,42 +439,32 @@ components:
         id:
           type: integer
           example: 1
-        name:
+        nombre:
           type: string
           example: "Rick Sanchez"
-        status:
+        estado:
           type: string
           enum: [Alive, Dead, unknown]
           example: "Alive"
-        species:
+        especie:
           type: string
           example: "Human"
-        type:
-          type: string
-          example: ""
-        gender:
+        genero:
           type: string
           enum: [Female, Male, Genderless, unknown]
           example: "Male"
-        origin:
+        origen:
           $ref: '#/components/schemas/LocationRef'
-        location:
-          $ref: '#/components/schemas/LocationRef'
-        image:
+        foto:
           type: string
           format: uri
           example: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
-        episode:
+        episodios:
           type: array
           items:
             type: string
-            format: uri
-          example: ["https://rickandmortyapi.com/api/episode/1"]
-        url:
-          type: string
-          format: uri
-          example: "https://rickandmortyapi.com/api/character/1"
-        created:
+          example: ["1"]
+        fechaCreacion:
           type: string
           format: date-time
           example: "2017-11-04T18:48:46.250Z"
