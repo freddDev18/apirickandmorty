@@ -69,4 +69,19 @@ Content-Type: application/json
   }
 ]
 
+### Recuperar todos los personajes
+# @name getAll
+GET {{baseUrl}}/api/v1/character?page=10
+
+### Recuperar el detalle del personaje
+# @name getAll
+GET {{baseUrl}}/api/v1/character/4
+
+### Recuperar todas las ubicaciones
+# @name getAll
+GET {{baseUrl}}/api/v1/location?page=2
+
+### Recuperar el detalle de la ubicacio
+# @name getAll
+GET {{baseUrl}}/api/v1/location/1
 

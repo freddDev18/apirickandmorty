@@ -14,4 +14,45 @@ const gracefulShutdown = (server) => {
     process.exit(1);
   }, 5000);
 };
-module.exports = gracefulShutdown;
+
+const renameKeys = function renameKeysDeep(obj, keyMap) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => renameKeysDeep(item, keyMap));
+  }
+
+  const renamedObj = {};
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const newKey = keyMap[key] || key;
+      renamedObj[newKey] = renameKeysDeep(obj[key], keyMap);
+    }
+  }
+  return renamedObj;
+};
+
+const pagination = function paginationData(dataAllCharactersInfo) {
+  const mapResponseInfo = renameKeys(dataAllCharactersInfo, {
+    count: 'totalRegistros',
+    pages: 'numeroPaginas',
+    next: 'siguiente',
+    prev: 'anterior',
+  });
+
+  const numSiguiente = mapResponseInfo.siguiente != null ? (mapResponseInfo.siguiente).split('=')[1] : null;
+  const numAnterior = mapResponseInfo.anterior != null ? (mapResponseInfo.anterior).split('=')[1] : null;
+
+  mapResponseInfo.siguiente = numSiguiente != null ? `/api/v1/character?page=${numSiguiente}` : null;
+  mapResponseInfo.anterior = numAnterior != null ? `/api/v1/character?page=${numAnterior}` : null;
+
+  return mapResponseInfo;
+};
+
+module.exports = {
+  gracefulShutdown, renameKeys, pagination,
+};

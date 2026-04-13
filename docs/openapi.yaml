@@ -159,6 +159,8 @@ paths:
         - Personajes
       summary: Obtener lista de personajes
       description: Retorna una lista paginada de todos los personajes de la serie.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Respuesta exitosa
@@ -166,7 +168,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CharacterPaginatedResponse'
-        '400':
+        '404':
           $ref: '#/components/responses/BadRequest.response'
         '422':
           $ref: '#/components/responses/UnprocessableContent.response'
@@ -179,7 +181,7 @@ paths:
       summary: Obtener el detalle de un personaje único
       description: Retorna toda la información de un solo personaje identificado por su ID.
       parameters:
-        - $ref: '#/components/parameters/id.idCharacter'
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Personaje encontrado exitosamente
@@ -202,16 +204,12 @@ paths:
       parameters: 
         - name: ids
           in: path
-          description: Lista de IDs de personajes (ej. 1,2,3)
+          description: Lista de IDs de personajes separados por coma (ej. 2,4,6)
           required: true
           schema:
-            type: array
-            items:
-              type: integer
-            example: [1, 2, 3]
-          # 'style: simple' y 'explode: false' es lo que permite el formato 1,2,3
-          style: simple
-          explode: false
+            type: string
+            pattern: '^\d+(,\d+)*$'  # <--- MAGIA: Solo acepta "1", "1,2", "1,2,3", etc.
+          example: '2,4,6'
       responses:
         '200':
           description: Respuesta exitosa
@@ -231,6 +229,8 @@ paths:
         - Ubicaciones
       summary: Obtener lista de ubicaciones
       description: Retorna una lista paginada de todos los planetas, dimensiones y estaciones espaciales.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Respuesta exitosa
@@ -251,13 +251,7 @@ paths:
       summary: Obtener detalle de una ubicación única
       description: Retorna la información completa de una sola ubicación (planeta, dimensión o estación) identificado por su ID.
       parameters:
-        - name: id
-          in: path
-          description: ID numérico de la ubicación
-          required: true
-          schema:
-            type: integer
-            example: 3
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Ubicación encontrada
@@ -277,6 +271,8 @@ paths:
         - Episodios
       summary: Obtener lista de episodios
       description: Retorna una lista paginada de todos los episodios emitidos.
+      parameters:
+        - $ref: '#/components/parameters/page.parameter'
       responses:
         '200':
           description: Listado de episodios obtenido con éxito.
@@ -297,13 +293,7 @@ paths:
       summary: Obtener detalle de un episodio único
       description: Retorna la información completa de un solo episodio identificado por su ID.
       parameters:
-        - name: id
-          in: path
-          description: ID numérico del episodio a consultar
-          required: true
-          schema:
-            type: integer
-            example: 1
+        - $ref: '#/components/parameters/id.parameter'
       responses:
         '200':
           description: Episodio encontrado exitosamente
@@ -319,6 +309,14 @@ paths:
           $ref: '#/components/responses/ServerError.response'
 components:
   parameters:
+    page.parameter:
+      name: page 
+      in: query
+      description: Número de pagina
+      required: true
+      schema:
+        type: integer
+        example: 1
     idCharacter.parameter: 
       name: id
       in: path
@@ -330,7 +328,7 @@ components:
     id.parameter:
       name: id
       in: path
-      description: ID del usuario
+      description: ID detalle del elemento
       required: true
       schema:
         $ref: '#/components/schemas/uuid'
@@ -344,9 +342,9 @@ components:
   schemas:
     uuid:
       type: string
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      minLength: 36
-      maxLength: 36
+      pattern: '^[0-9]+$'
+      minLength: 1
+      maxLength: 3
       example: 663d5363-ea3b-43f5-be04-3e7ccef942cc
     Fecha:
       type: object
@@ -441,42 +439,32 @@ components:
         id:
           type: integer
           example: 1
-        name:
+        nombre:
           type: string
           example: "Rick Sanchez"
-        status:
+        estado:
           type: string
           enum: [Alive, Dead, unknown]
           example: "Alive"
-        species:
+        especie:
           type: string
           example: "Human"
-        type:
-          type: string
-          example: ""
-        gender:
+        genero:
           type: string
           enum: [Female, Male, Genderless, unknown]
           example: "Male"
-        origin:
+        origen:
           $ref: '#/components/schemas/LocationRef'
-        location:
-          $ref: '#/components/schemas/LocationRef'
-        image:
+        foto:
           type: string
           format: uri
           example: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"
-        episode:
+        episodios:
           type: array
           items:
             type: string
-            format: uri
-          example: ["https://rickandmortyapi.com/api/episode/1"]
-        url:
-          type: string
-          format: uri
-          example: "https://rickandmortyapi.com/api/character/1"
-        created:
+          example: ["1"]
+        fechaCreacion:
           type: string
           format: date-time
           example: "2017-11-04T18:48:46.250Z"
