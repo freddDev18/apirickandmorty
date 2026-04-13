@@ -36,6 +36,23 @@ const renameKeys = function renameKeysDeep(obj, keyMap) {
   return renamedObj;
 };
 
+const pagination = function paginationData(dataAllCharactersInfo) {
+  const mapResponseInfo = renameKeys(dataAllCharactersInfo, {
+    count: 'totalRegistros',
+    pages: 'numeroPaginas',
+    next: 'siguiente',
+    prev: 'anterior',
+  });
+
+  const numSiguiente = mapResponseInfo.siguiente != null ? (mapResponseInfo.siguiente).split('=')[1] : null;
+  const numAnterior = mapResponseInfo.anterior != null ? (mapResponseInfo.anterior).split('=')[1] : null;
+
+  mapResponseInfo.siguiente = numSiguiente != null ? `/api/v1/character?page=${numSiguiente}` : null;
+  mapResponseInfo.anterior = numAnterior != null ? `/api/v1/character?page=${numAnterior}` : null;
+
+  return mapResponseInfo;
+};
+
 module.exports = {
-  gracefulShutdown, renameKeys,
+  gracefulShutdown, renameKeys, pagination,
 };
